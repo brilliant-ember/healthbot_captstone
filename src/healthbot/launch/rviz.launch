@@ -1,0 +1,19 @@
+<launch>
+  <param name="robot_description"
+    command="$(find xacro)/xacro --inorder '$(find healthbot)/urdf/hbot_base.xacro'" />
+
+  <!-- send fake joint values -->
+  <!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" value="TRUE"/>
+  </node> -->
+  <!-- You have to use the line below to launch the gui because the arg use gui has been depricated -->
+  <!-- look at this link for info, the deprication happened in Noetic https://answers.ros.org/question/363410/joint_state_publisher-window-is-not-shown/ -->
+  <node pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" name="joint_state_publisher_gui" output="screen"/>
+
+  <!-- Combine joint values -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
+
+  <!-- Show in Rviz   -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find healthbot)/launch/hbot.rviz"/>
+
+</launch>
