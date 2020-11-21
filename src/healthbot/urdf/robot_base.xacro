@@ -1,0 +1,86 @@
+<?xml version="1.0" ?>
+<robot name="robot_base">
+  <joint name="robot_base__left_wheel_hinge" type="revolute">
+    <parent link="robot_base__chassis"/>
+    <child link="robot_base__left_wheel"/>
+    <origin xyz="0.79999 0.505   0.12499" rpy="1.26000e-03 1.57070e+00 1.57196e+00"/>
+    <axis xyz="9.e-05 9.e-05 1.e+00"/>
+    <limit lower="-1e+16" upper="1e+16" effort="-1.0" velocity="-1.0"/>
+  </joint>
+  <joint name="robot_base__right_wheel_hinge" type="revolute">
+    <parent link="robot_base__chassis"/>
+    <child link="robot_base__right_wheel"/>
+    <origin xyz="0.8   -0.505  0.125" rpy="1.26000e-03 1.57070e+00 1.57196e+00"/>
+    <axis xyz="9.e-05 9.e-05 1.e+00"/>
+    <limit lower="-1e+16" upper="1e+16" effort="-1.0" velocity="-1.0"/>
+  </joint>
+  <link name="robot_base__chassis">
+    <inertial>
+      <mass value="20"/>
+      <origin xyz="-0.1  0  -0.1" rpy="0 0 0"/>
+      <inertia ixx="0.5" ixy="0" ixz="0" iyy="1" iyz="0" izz="0.1"/>
+    </inertial>
+    <collision name="robot_base__caster_collision">
+      <origin xyz="-0.8    0     0.125" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.125"/>
+      </geometry>
+    </collision>
+    <collision name="robot_base__collision">
+      <origin xyz="0   0   0.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="2 1 0.3"/>
+      </geometry>
+    </collision>
+    <visual name="robot_base__visual">
+      <origin xyz="0   0   0.25" rpy="0 0 0"/>
+      <geometry>
+        <box size="2 1 0.3"/>
+      </geometry>
+    </visual>
+    <visual name="robot_base__caster_visual">
+      <origin xyz="-0.8    0     0.125" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.125"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="robot_base__left_wheel">
+    <inertial>
+      <mass value="1"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <collision name="robot_base__collision">
+      <origin xyz="0   0   0.03" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.125" length="0.05"/>
+      </geometry>
+    </collision>
+    <visual name="robot_base__visual">
+      <origin xyz="0   0   0.03" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.125" length="0.05"/>
+      </geometry>
+    </visual>
+  </link>
+  <link name="robot_base__right_wheel">
+    <inertial>
+      <mass value="1"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
+    </inertial>
+    <collision name="robot_base__collision">
+      <origin xyz="0    0   -0.03" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.125" length="0.05"/>
+      </geometry>
+    </collision>
+    <visual name="robot_base__visual">
+      <origin xyz="0    0   -0.03" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.125" length="0.05"/>
+      </geometry>
+    </visual>
+  </link>
+</robot>

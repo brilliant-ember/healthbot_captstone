@@ -3,14 +3,14 @@
 
 <!-- This is to spawn the sdf file to gazebo -->
     <include file="$(find healthbot)/launch/spawn_sdf.launch">
-        <arg name="robot_name" value="my_robot" />
+        <arg name="robot_name" value="healthbot" />
         <arg name="x" value="0.0" />
         <arg name="y" value="0.0" />
         <arg name="z" value="1.0" />
         <arg name="roll" value="0"/>
         <arg name="pitch" value="0"/>
         <arg name="yaw" value="0.0" />
-        <arg name="sdf_robot_file" value="$(find healthbot)/sdf/my_robot/model.sdf" />
+        <arg name="sdf_robot_file" value="$(find healthbot)/sdf/healthbot/model.sdf" />
     </include>
 
     <!-- these are the arguments you can pass this launch file, for example paused:=true -->
