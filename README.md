@@ -4,6 +4,8 @@
 
 1. at the root of the workspace do `catkin_make && source devel/setup.sh`
 2. Do `roslaunch pkg launchfile` u can choose from the ones below
+   
+   
 launch rviz
 `roslaunch healthbot rviz.launch`
 
