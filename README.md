@@ -24,6 +24,17 @@ The robot model was constructed in the gazebo gui, so the output is an sdf file,
 use the command to convert, this is already done but if you want to make edits dont edit urdf directly unless u know what u r doing
 `rosrun pysdf sdf2urdf.py src/healthbot/sdf/healthbot/model.sdf src/healthbot/urdf/healthbot.xacro`
 
+After that make sure you add a base link to the urdf file (like bvelow) and the transmission to the joints and the gazebo conrol plugin if you want to control them because gazebo is the joint state publisher.
+``` xml
+<!-- Root link -->
+  <link name="world"/>
+  <joint name="fixed" type="fixed">
+    <parent link="world"/>
+    <child link="mobile_base__chassis"/>
+  </joint>
+
+```
+
 _Note_ You will NOT be able to convert unless the gazebo sdf verison is 1.6 or below so go to the sdf file and edit it to 1.6 in the sdf verison tag
 
 To check if your urdf is correct use this command
