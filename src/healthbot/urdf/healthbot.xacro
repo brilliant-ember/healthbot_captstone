@@ -1,114 +1,168 @@
 <?xml version="1.0" ?>
-
 <robot name="healthbot">
-  <!-- Root link -->
-<link name="world"/>
-<joint name="fixed" type="fixed">
-  <parent link="world"/>
-  <child link="healthbot__chassis"/>
-</joint>
 
+
+ <gazebo>	
+ <plugin filename="libgazebo_ros_diff_drive.so" name="differential_drive_controller">
+      <legacyMode>false</legacyMode>
+      <alwaysOn>true</alwaysOn>
+      <updateRate>20</updateRate>
+      <leftJoint>Healthbot__left_wheel_hinge</leftJoint>
+      <rightJoint>Healthbot__right_wheel_hinge</rightJoint>
+      <wheelSeparation>0.4</wheelSeparation>
+      <wheelDiameter>0.1</wheelDiameter>
+      <torque>20</torque>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom</odometryFrame>
+      <robotBaseFrame>chassis</robotBaseFrame>
+    </plugin>
+  </gazebo>
+
+
+<!-- Transmission is important to link the joints and the controller -->
+           <transmission name="joint_w1_trans" type="SimpleTransmission">
+                   <actuator name="joint_w1_motor" />
+                  <joint name="Healthbot__left_wheel_hinge" />
+                  <mechanicalReduction>1</mechanicalReduction>
+                  <motorTorqueConstant>1</motorTorqueConstant>
+         </transmission>
+
+<transmission name="joint_w2_trans" type="SimpleTransmission">
+                  <actuator name="joint_w2_motor" />
+                 <joint name="Healthbot__right_wheel_hinge" />
+                 <mechanicalReduction>1</mechanicalReduction>
+                  <motorTorqueConstant>1</motorTorqueConstant>
+          </transmission>
+
+
+  <joint name="healthbot__chassis_JOINT_0" type="fixed">
+    <parent link="healthbot__riser"/>
+    <child link="healthbot__camera"/>
+    <origin rpy="0       0      -0.00144" xyz="0.04984  0.00387  0.54136"/>
+    <axis xyz="0  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
+  </joint>
   <joint name="healthbot__chassis_gripper_fixed_joint" type="fixed">
     <parent link="healthbot__chassis"/>
     <child link="healthbot__riser"/>
-    <origin xyz="-1.09676  0       0.58693" rpy="0       0      -3.13784"/>
-    <axis xyz="0 0 0"/>
-    <limit lower="0" upper="0" effort="0" velocity="0"/>
-  </joint>
-  <joint name="healthbot__joint_left_finger_tip" type="revolute">
-    <parent link="healthbot__left_finger"/>
-    <child link="healthbot__left_finger_tip"/>
-    <origin xyz="-0.04411  0.31132 -0.00252" rpy="0       0      -2.62881"/>
-    <axis xyz="0 0 1"/>
-    <limit lower="-0.4" upper="0.4" effort="-1.0" velocity="-1.0"/>
-  </joint>
-  <joint name="healthbot__left_wheel_hinge" type="revolute">
-    <parent link="healthbot__chassis"/>
-    <child link="healthbot__left_wheel"/>
-    <origin xyz="0.79999 0.505   0.12499" rpy="4.40000e-04 1.57070e+00 1.57114e+00"/>
-    <axis xyz="9.e-05 9.e-05 1.e+00"/>
-    <limit lower="-1e+16" upper="1e+16" effort="-1.0" velocity="-1.0"/>
+    <origin rpy="0       0      -3.13784" xyz="-1.09676  0       0.58693"/>
+    <axis xyz="0  0  0"/>
+    <limit effort="0" lower="0" upper="0" velocity="0"/>
   </joint>
   <joint name="healthbot__joint_left_finger" type="revolute">
     <parent link="healthbot__palm"/>
     <child link="healthbot__left_finger"/>
-    <origin xyz="0.07149 -0.05105 -0.01288" rpy="0       0      -2.16075"/>
-    <axis xyz="0 0 1"/>
-    <limit lower="-0.4" upper="0.4" effort="-1.0" velocity="-1.0"/>
+    <origin rpy="0       0      -2.16075" xyz="0.07149 -0.05105 -0.01288"/>
+    <axis xyz="0  0  1"/>
+    <limit effort="-1.0" lower="-0.4" upper="0.4" velocity="-1.0"/>
+  </joint>
+  <joint name="healthbot__joint_left_finger_tip" type="revolute">
+    <parent link="healthbot__left_finger"/>
+    <child link="healthbot__left_finger_tip"/>
+    <origin rpy="0       0      -2.62881" xyz="-0.04411  0.31132 -0.00252"/>
+    <axis xyz="0  0  1"/>
+    <limit effort="-1.0" lower="-0.4" upper="0.4" velocity="-1.0"/>
   </joint>
   <joint name="healthbot__joint_right_finger" type="revolute">
     <parent link="healthbot__palm"/>
     <child link="healthbot__right_finger"/>
-    <origin xyz="0.07084  0.05881 -0.01264" rpy="0      0      2.08708"/>
-    <axis xyz="0 0 1"/>
-    <limit lower="-0.4" upper="0.4" effort="-1.0" velocity="-1.0"/>
-  </joint>
-  <joint name="healthbot__palm_riser" type="prismatic">
-    <parent link="healthbot__riser"/>
-    <child link="healthbot__palm"/>
-    <origin xyz="1.2773e-01 -3.8000e-04 -4.3013e-01" rpy="0       0      -0.01002"/>
-    <axis xyz="0 0 1"/>
-    <limit lower="0.0" upper="0.9" effort="-1.0" velocity="-1.0"/>
+    <origin rpy="0       0       2.08708" xyz="0.07084  0.05881 -0.01264"/>
+    <axis xyz="0  0  1"/>
+    <limit effort="-1.0" lower="-0.4" upper="0.4" velocity="-1.0"/>
   </joint>
   <joint name="healthbot__joint_right_finger_tip" type="revolute">
     <parent link="healthbot__right_finger"/>
     <child link="healthbot__right_finger_tip"/>
-    <origin xyz="-0.02849 -0.31307 -0.00111" rpy="0       0      -0.52322"/>
-    <axis xyz="0 0 1"/>
-    <limit lower="-0.4" upper="0.4" effort="-1.0" velocity="-1.0"/>
+    <origin rpy="0       0      -0.52322" xyz="-0.02849 -0.31307 -0.00111"/>
+    <axis xyz="0  0  1"/>
+    <limit effort="-1.0" lower="-0.4" upper="0.4" velocity="-1.0"/>
+  </joint>
+  <joint name="healthbot__left_wheel_hinge" type="revolute">
+    <parent link="healthbot__chassis"/>
+    <child link="healthbot__left_wheel"/>
+    <origin rpy="4.80000000e-04   1.57070000e+00   1.57117000e+00" xyz="0.79999  0.505    0.12499"/>
+    <axis xyz="-1.00000000e+00  -9.00000000e-05   1.90000000e-04"/>
+    <limit effort="-1.0" lower="-1e+16" upper="1e+16" velocity="-1.0"/>
+  </joint>
+  <joint name="healthbot__palm_riser" type="prismatic">
+    <parent link="healthbot__riser"/>
+    <child link="healthbot__palm"/>
+    <origin rpy="0       0      -0.01002" xyz="1.27730000e-01  -3.80000000e-04  -4.30130000e-01"/>
+    <axis xyz="0  0  1"/>
+    <limit effort="-1.0" lower="0.0" upper="0.9" velocity="-1.0"/>
   </joint>
   <joint name="healthbot__right_wheel_hinge" type="revolute">
     <parent link="healthbot__chassis"/>
     <child link="healthbot__right_wheel"/>
-    <origin xyz="0.8   -0.505  0.125" rpy="4.40000e-04 1.57070e+00 1.57114e+00"/>
-    <axis xyz="9.e-05 9.e-05 1.e+00"/>
-    <limit lower="-1e+16" upper="1e+16" effort="-1.0" velocity="-1.0"/>
+    <origin rpy="4.80000000e-04   1.57070000e+00   1.57117000e+00" xyz="0.8   -0.505  0.125"/>
+    <axis xyz="-1.00000000e+00  -9.00000000e-05   1.90000000e-04"/>
+    <limit effort="-1.0" lower="-1e+16" upper="1e+16" velocity="-1.0"/>
   </joint>
   <link name="healthbot__chassis">
     <inertial>
       <mass value="20"/>
-      <origin xyz="-0.1  0  -0.1" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="-0.1  0  -0.1"/>
       <inertia ixx="0.5" ixy="0" ixz="0" iyy="1" iyz="0" izz="0.1"/>
     </inertial>
     <collision name="healthbot__caster_collision">
-      <origin xyz="-0.8    0     0.125" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="-0.8    0     0.125"/>
       <geometry>
         <sphere radius="0.125"/>
       </geometry>
     </collision>
     <collision name="healthbot__collision">
-      <origin xyz="0   0   0.25" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0    0    0.25"/>
       <geometry>
         <box size="2 1 0.3"/>
       </geometry>
     </collision>
+    <visual name="healthbot__visual">
+      <origin rpy="0  0  0" xyz="0    0    0.25"/>
+      <geometry>
+        <box size="2 1 0.3"/>
+      </geometry>
+    </visual>
     <visual name="healthbot__caster_visual">
-      <origin xyz="-0.8    0     0.125" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="-0.8    0     0.125"/>
       <geometry>
         <sphere radius="0.125"/>
       </geometry>
     </visual>
-    <visual name="healthbot__visual">
-      <origin xyz="0   0   0.25" rpy="0 0 0"/>
+  </link>
+  <link name="healthbot__camera">
+    <inertial>
+      <mass value="0.1"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <inertia ixx="0.000166667" ixy="0" ixz="0" iyy="0.000166667" iyz="0" izz="0.000166667"/>
+    </inertial>
+    <collision name="healthbot__collision">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
       <geometry>
-        <box size="2 1 0.3"/>
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+    </collision>
+    <visual name="healthbot__visual">
+      <origin rpy="0  0  0" xyz="0  0  0"/>
+      <geometry>
+        <box size="0.1 0.1 0.1"/>
       </geometry>
     </visual>
   </link>
   <link name="healthbot__left_finger">
     <inertial>
       <mass value="0.1"/>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
       <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
     </inertial>
     <collision name="healthbot__collision">
-      <origin xyz="0   0.15 0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0    0.15  0"/>
       <geometry>
         <box size="0.1 0.3 0.1"/>
       </geometry>
     </collision>
     <visual name="healthbot__visual">
-      <origin xyz="0   0.15 0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0    0.15  0"/>
       <geometry>
         <box size="0.1 0.3 0.1"/>
       </geometry>
@@ -117,17 +171,17 @@
   <link name="healthbot__left_finger_tip">
     <inertial>
       <mass value="0.1"/>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
       <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
     </inertial>
     <collision name="healthbot__collision">
-      <origin xyz="0  -0.1  0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  -0.1  0"/>
       <geometry>
         <box size="0.1 0.2 0.1"/>
       </geometry>
     </collision>
     <visual name="healthbot__visual">
-      <origin xyz="0  -0.1  0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  -0.1  0"/>
       <geometry>
         <box size="0.1 0.2 0.1"/>
       </geometry>
@@ -136,36 +190,36 @@
   <link name="healthbot__left_wheel">
     <inertial>
       <mass value="1"/>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
       <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
     </inertial>
     <collision name="healthbot__collision">
-      <origin xyz="0   0   0.03" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0    0    0.03"/>
       <geometry>
-        <cylinder radius="0.125" length="0.05"/>
+        <cylinder length="0.05" radius="0.125"/>
       </geometry>
     </collision>
     <visual name="healthbot__visual">
-      <origin xyz="0   0   0.03" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0    0    0.03"/>
       <geometry>
-        <cylinder radius="0.125" length="0.05"/>
+        <cylinder length="0.05" radius="0.125"/>
       </geometry>
     </visual>
   </link>
   <link name="healthbot__palm">
     <inertial>
       <mass value="0.5"/>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
       <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
     </inertial>
     <collision name="healthbot__collision">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
       <geometry>
         <box size="0.1 0.2 0.1"/>
       </geometry>
     </collision>
     <visual name="healthbot__visual">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
       <geometry>
         <box size="0.1 0.2 0.1"/>
       </geometry>
@@ -174,17 +228,17 @@
   <link name="healthbot__right_finger">
     <inertial>
       <mass value="0.1"/>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
       <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
     </inertial>
     <collision name="healthbot__collision">
-      <origin xyz="0   -0.15  0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0   -0.15  0"/>
       <geometry>
         <box size="0.1 0.3 0.1"/>
       </geometry>
     </collision>
     <visual name="healthbot__visual">
-      <origin xyz="0   -0.15  0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0   -0.15  0"/>
       <geometry>
         <box size="0.1 0.3 0.1"/>
       </geometry>
@@ -193,17 +247,17 @@
   <link name="healthbot__right_finger_tip">
     <inertial>
       <mass value="0.1"/>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
       <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
     </inertial>
     <collision name="healthbot__collision">
-      <origin xyz="0  -0.1  0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  -0.1  0"/>
       <geometry>
         <box size="0.1 0.2 0.1"/>
       </geometry>
     </collision>
     <visual name="healthbot__visual">
-      <origin xyz="0  -0.1  0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  -0.1  0"/>
       <geometry>
         <box size="0.1 0.2 0.1"/>
       </geometry>
@@ -212,36 +266,36 @@
   <link name="healthbot__right_wheel">
     <inertial>
       <mass value="1"/>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
       <inertia ixx="1" ixy="0" ixz="0" iyy="1" iyz="0" izz="1"/>
     </inertial>
     <collision name="healthbot__collision">
-      <origin xyz="0    0   -0.03" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0    0   -0.03"/>
       <geometry>
-        <cylinder radius="0.125" length="0.05"/>
+        <cylinder length="0.05" radius="0.125"/>
       </geometry>
     </collision>
     <visual name="healthbot__visual">
-      <origin xyz="0    0   -0.03" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0    0   -0.03"/>
       <geometry>
-        <cylinder radius="0.125" length="0.05"/>
+        <cylinder length="0.05" radius="0.125"/>
       </geometry>
     </visual>
   </link>
   <link name="healthbot__riser">
     <inertial>
       <mass value="10"/>
-      <origin xyz="0   0  -0.5" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0   0  -0.5"/>
       <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
     </inertial>
     <collision name="healthbot__collision">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
       <geometry>
         <box size="0.2 0.2 1"/>
       </geometry>
     </collision>
     <visual name="healthbot__visual">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin rpy="0  0  0" xyz="0  0  0"/>
       <geometry>
         <box size="0.2 0.2 1"/>
       </geometry>
