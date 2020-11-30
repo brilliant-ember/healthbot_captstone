@@ -5,12 +5,14 @@
   <xacro:include filename="$(find healthbot)/urdf/gazebo.xacro" />
   <xacro:include filename="$(find healthbot)/urdf/transmission.xacro" />
 
+  <xacro:property name="wheel_radius" value="0.2"/>
+
   <!-- Root link -->
-<link name="world"/>
+<!-- <link name="world"/>
 <joint name="fixed" type="fixed">
   <parent link="world"/>
   <child link="healthbot__chassis"/>
-</joint>
+</joint> -->
 
   <joint name="healthbot__left_wheel_hinge" type="revolute">
     <parent link="healthbot__chassis"/>
@@ -68,13 +70,13 @@
     <collision>
       <origin xyz="0   0   0.03" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.125" length="0.05"/>
+        <cylinder radius="${wheel_radius}" length="0.05"/>
       </geometry>
     </collision>
     <visual >
       <origin xyz="0   0   0.03" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.125" length="0.05"/>
+        <cylinder radius="${wheel_radius}" length="0.05"/>
       </geometry>
     </visual>
   </link>
@@ -144,13 +146,13 @@
     <collision name="healthbot__collision">
       <origin xyz="0    0   -0.03" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.125" length="0.05"/>
+        <cylinder radius="${wheel_radius}" length="0.05"/>
       </geometry>
     </collision>
     <visual name="healthbot__visual">
       <origin xyz="0    0   -0.03" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.125" length="0.05"/>
+        <cylinder radius="${wheel_radius}" length="0.05"/>
       </geometry>
     </visual>
   </link>

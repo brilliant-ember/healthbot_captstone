@@ -6,8 +6,8 @@ healthbot:
      left_wheel: ['healthbot__left_wheel_hinge']
      right_wheel: ['healthbot__right_whee_hingel']
 
-     wheel_separation: 0.22
-     wheel_radius: 0.055
+     wheel_separation: 1.01
+     wheel_radius: 0.2
      # Odometry covariances for the encoder output of the robot. These values should
      # be tuned to your robot's sample odometry data, but these values are a good place
      # to start

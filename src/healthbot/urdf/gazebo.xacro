@@ -10,13 +10,15 @@
     </gazebo>
 
     <gazebo reference="healthbot__left_wheel">
-
         <material>Gazebo/Black</material>
+        <mu1>100.0</mu1>
+        <mu2>50.0</mu2>
     </gazebo>
 
     <gazebo reference="healthbot__right_wheel">
-
         <material>Gazebo/Black</material>
+        <mu1>100.0</mu1>
+        <mu2>50.0</mu2>
     </gazebo>
 
     <gazebo>
@@ -31,7 +33,7 @@
             <wheelSeparation>0.5380</wheelSeparation>
 
             <!-- Diameter of the wheels, in meters, defaults to 0.15 m -->
-            <wheelDiameter>0.25</wheelDiameter>
+            <wheelDiameter>0.4</wheelDiameter>
 
             <!-- Wheel acceleration, in rad/s^2, defaults to 0.0 rad/s^2 -->
             <wheelAcceleration>1.0</wheelAcceleration>

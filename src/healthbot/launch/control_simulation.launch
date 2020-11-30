@@ -54,6 +54,6 @@
       args="-urdf -model healthbot -param robot_description"/>
 
   <!-- show in Rviz   -->
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find healthbot)/config/rviz_config.rviz"/>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find healthbot)/config/rviz_diff_drive.rviz"/>
 
 </launch>
