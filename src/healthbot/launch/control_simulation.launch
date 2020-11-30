@@ -7,18 +7,29 @@
   <!-- Load controller config from the yaml file to the parameter server -->
   <rosparam file="$(find healthbot)/config/healthbot_control.yaml" command="load"/>
 
+
+  <!-- Load controller config from the yaml file to the parameter server -->
+  <rosparam file="$(find healthbot)/config/diff_drive.yaml" command="load"/>
+
+
   <!-- load the controllers -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner"
     respawn="false" output="screen" ns="/healthbot"
-    args="joint_state_controller palm_riser_controller right_wheel_controller left_wheel_controller
-    left_finger_controller left_finger_tip_controller right_finger_controller right_finger_tip_controller"
+    args="joint_state_controller  diff_drive_controller right_wheel_controller left_wheel_controller
+    "
   />
+  <!-- left_finger_controller left_finger_tip_controller right_finger_controller right_finger_tip_controller palm_riser_controller -->
 
   <!-- combine joint values for the forward kinamatics of the robot -->
   <node name="robot_state_publisher" pkg="robot_state_publisher" 
   type="robot_state_publisher">
-    <remap from="/joint_states" to="/healthbot/joint_states" />
+    <!-- <remap from="/joint_states" to="/healthbot/joint_states" /> -->
   </node>
+
+
+<node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
+  <param name="default_topic" value="/healthbot/diff_drive_controller/cmd_vel"/> 
+</node>
 
   <!-- launch Gazebo -->
   <arg name="paused" default="false"/>
@@ -43,6 +54,6 @@
       args="-urdf -model healthbot -param robot_description"/>
 
   <!-- show in Rviz   -->
-  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find healthbot)/config/rviz_config.rviz"/> -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find healthbot)/config/rviz_config.rviz"/>
 
 </launch>
