@@ -1,6 +1,8 @@
 # Capstone project healthbot
 
-## To start the project
+The Ros and gazebo files are in the src dir, the coppeliaSim files in the coppeliaSim dir
+
+## To start the ROS project
 
 1. at the root of the workspace do `catkin_make && source devel/setup.sh`
 2. Do `roslaunch pkg launchfile` u can choose from the ones below
