@@ -13,6 +13,9 @@ function sysCall_init()
     rawSpeed = 1.5
     distanceBtwnWheels = 1.0300e-01
     wheelRadius = 6.0000e-02
+    -- negative for right turn positive for left turn
+    turnRate = 0.12
+    minAllowedDistanceFromWall = 0.12
     
     --variables
     angularVelocity = 0
@@ -34,14 +37,25 @@ function sysCall_sensing()
         rightDistance = getSonarDistance(rightSonar)
         leftDistance = getSonarDistance(leftSonar)
         
+        print({frontDistance, rightDistance, leftDistance})
         freeTbl = getFreeDirection(frontDistance, rightDistance, leftDistance)
         
-        if (not freeTbl['front'])then
-            twist(-0.12)
+        if (not freeTbl['front']) then
+    
+            if(freeTbl['right']) then 
+                turn('right')
+            elseif (freeTbl['left']) then
+                turn('left')
+            else
+                turnToFurthestWall(frontDistance, rightDistance, leftDistance)
+            end
         else
-            -- subtract angular vlocity from itself to make it zero
-            twist(-angularVelocity)
-        end    
+            turn('front')
+        end
+        
+        
+        turnAwayFromCloseSideWall(rightDistance, leftDistance)
+
 
 end
 
@@ -51,6 +65,19 @@ end
 
 -- See the user manual or the available code snippets for additional callback functions and details
 
+function turnToFurthestWall(frontDistance, rightDistance, leftDistance)
+    -- right distance from wall is largest
+    if (rightDistance > leftDistance and right>frontDistance) then
+        turn('right')
+    -- left distance is largest
+    elseif(leftDistance > rightDistance and leftDistance > frontDistance) then
+        turn('left')
+    -- front distance is largesr than or equal any of the two sides
+    elseif(frontDistance >= rightDistance or frontDistance >= leftDistance) then
+        turn('front')
+    end
+    
+end
 
 function getSonarDistance(sensor)
     local detected, distance
@@ -61,8 +88,25 @@ function getSonarDistance(sensor)
     return distance
 end
 
+
+function turnAwayFromCloseSideWall(rightDistance, leftDistance)
+-- if there's a wall to the right or left that is too close, this func will turn thr bot away
+-- from that wall
+    mul = 1
+    if (rightDistance < 0.065 or leftDistance < 0.067) then
+        mul = 30
+    end
+    if (rightDistance <= minAllowedDistanceFromWall) then
+        print('rightWall too close')
+        turn('left', mul)
+    elseif (leftDistance <= minAllowedDistanceFromWall) then
+        print('leftWall too close')
+        turn('right', mul)
+    end
+
+end
 function getFreeDirection(frontDistance, rightDistance, leftDistance)
--- if direction is free say fron the free table will be true, if direction is not free will be false
+-- if direction is free in  a dir, the table will be true at its key, if direction is not free will be false
 -- ex free['front'] ==true if there's no object infront of front sonar
     free = {}
     free['front'] = true
@@ -84,8 +128,19 @@ function getFreeDirection(frontDistance, rightDistance, leftDistance)
     return free
 end
 
-function twist(angle)
-    angularVelocity = angularVelocity + angle
+function turn(dir, multiplier)
+    multiplier = multiplier or 1
+    print('turning ' .. dir)
+    if (dir == 'front') then
+        angularVelocity = 0
+    elseif (dir == 'right') then
+        angularVelocity = angularVelocity - turnRate * multiplier
+    elseif (dir == 'left') then
+        angularVelocity = angularVelocity + turnRate * multiplier
+    else
+        error("invalid Direction to the turn function")
+    end
+
     calculateWheelsVelocities2()
 end
 
