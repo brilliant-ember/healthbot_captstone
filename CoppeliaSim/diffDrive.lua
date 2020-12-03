@@ -1,12 +1,17 @@
 function sysCall_init()
---Note the faster the right motor the more LEFT the robot turns (Assuming zero speed for left motor)
+
+    -- this gets the handle to the object owning the script so RobotBase in this case
+    robotHandle=sim.getObjectAssociatedWithScript(sim.handle_self)
+    
+    -- Note the faster the right motor the more LEFT the robot turns (Assuming zero speed for left motor)
     lJoint = sim.getObjectHandle('LeftMotor')
     rJoint = sim.getObjectHandle('RightMotor')
     
-    -- proximity sensors
+    --sensors
     frontSonar = sim.getObjectHandle('frontSonar')
     rightSonar = sim.getObjectHandle('rightSonar')
     leftSonar = sim.getObjectHandle('leftSonar')
+    frontCamera = sim.getObjectHandle('frontCamera')
 
     -- Constants
     sonarMaxRange = 0.4 
@@ -25,6 +30,35 @@ function sysCall_init()
     sim.setJointTargetVelocity(lJoint, rawSpeed)
     sim.setJointTargetVelocity(rJoint, rawSpeed)
     
+    -- launch the ros client
+    if simROS then
+        sim.addLog(sim.verbosity_scriptinfos, "Ros interface found konoyaro")
+        -- prepare topic names
+        local symtime = sim.getSystemTime(-1) * 10000
+        local leftMotorTopicName = "leftMotorSpeed" .. symtime
+        local rightMotorTopicName = "rightMotorSpeed" .. symtime
+        local sensorTopicName = "sensorTrigger" .. symtime
+        local simulationTimeTopicName = "simtime" .. symtime
+        local cameraTopicName = 'hbot_camera'
+        
+        -- publishers
+        sensorPub = simROS.advertise('/'..sensorTopicName, 'std_msgs/Bool')
+        simTimePub = simROS.advertise('/'..simulationTimeTopicName, 'std_msgs/Float32')
+        cameraPub=simROS.advertise('/'..cameraTopicName, 'sensor_msgs/Image')
+        
+        --prepare subscribers (comment like and subscribe ;) )
+         simROS.publisherTreatUInt8ArrayAsString(cameraPub) -- treat uint8 arrays as strings (much faster, tables/arrays are slow in Lua)
+
+       -- leftMotorSub = simROS.subscribe('/'..leftMotorTopicName, 'std_msgs/Float32', 'setLeftMotorVelocityCallback')
+        --rightMotorSub = simROS.subscribe('/'..rightMotorTopicName, 'std_msgs/Float32', 'setRightMotorVelocityCallback')
+        
+        -- start the client if running from external script.
+        --result = sim.launchExecutable(
+    else
+        sim.addLog(sim.verbosity_scripterrors, "ROS interface was not found. Cannot run.")
+        error("simRos isnt true, was roscore running before launching copelliasim?")
+    end
+    
 end
 
 function sysCall_actuation()
@@ -32,7 +66,21 @@ function sysCall_actuation()
 end
 
 function sysCall_sensing()
-    -- put your sensing code here
+    
+        if simROS then   
+        -- Publish the image of the active vision sensor:
+        local data,w,h=sim.getVisionSensorCharImage(frontCamera)
+        d={}
+        d['header']={stamp=simROS.getTime(), frame_id="a"}
+        d['height']=h
+        d['width']=w
+        d['encoding']='rgb8'
+        d['is_bigendian']=1
+        d['step']=w*3
+        d['data']=data
+        simROS.publish(cameraPub,d)
+    end
+    
         frontDistance = getSonarDistance(frontSonar)
         rightDistance = getSonarDistance(rightSonar)
         leftDistance = getSonarDistance(leftSonar)
@@ -93,7 +141,7 @@ function turnAwayFromCloseSideWall(rightDistance, leftDistance)
 -- if there's a wall to the right or left that is too close, this func will turn thr bot away
 -- from that wall
     mul = 1
-    if (rightDistance < 0.065 or leftDistance < 0.067) then
+    if (rightDistance < 0.07 or leftDistance < 0.07) then
         mul = 30
     end
     if (rightDistance <= minAllowedDistanceFromWall) then
