@@ -2,6 +2,16 @@
 
 The Ros and gazebo files are in the src dir, the coppeliaSim files in the coppeliaSim dir
 
+## Navigation
+Basic object detection is made with ultrasonic
+OpenVslam is used for one camera navigation
+RTAB-Map is used for stereo camear and lidar http://wiki.ros.org/rtabmap_ros
+useful stereo package http://wiki.ros.org/stereo_image_proc/Tutorials/ChoosingGoodStereoParameters
+other useful resources
+https://automaticaddison.com/working-with-ros-and-opencv-in-ros-noetic/
+https://docs.opencv.org/master/dd/d53/tutorial_py_depthmap.html
+
+
 ## To start the ROS project
 
 1. at the root of the workspace do `catkin_make && source devel/setup.sh`
