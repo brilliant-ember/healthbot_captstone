@@ -12,6 +12,7 @@ function sysCall_init()
     rightSonar = sim.getObjectHandle('rightSonar')
     leftSonar = sim.getObjectHandle('leftSonar')
     frontCamera = sim.getObjectHandle('frontCamera')
+    frontCamera2 = sim.getObjectHandle('frontCamera2')
 
     -- Constants
     sonarMaxRange = 0.4 
@@ -40,15 +41,19 @@ function sysCall_init()
         local sensorTopicName = "sensorTrigger" .. symtime
         local simulationTimeTopicName = "simtime" .. symtime
         local cameraTopicName = 'hbot_camera'
+        local cameraTopicName2 = 'hbot_camera2'
         
         -- publishers
         sensorPub = simROS.advertise('/'..sensorTopicName, 'std_msgs/Bool')
         simTimePub = simROS.advertise('/'..simulationTimeTopicName, 'std_msgs/Float32')
         cameraPub=simROS.advertise('/'..cameraTopicName, 'sensor_msgs/Image')
+        cameraPub2=simROS.advertise('/'..cameraTopicName2, 'sensor_msgs/Image')
         
         --prepare subscribers (comment like and subscribe ;) )
-         simROS.publisherTreatUInt8ArrayAsString(cameraPub) -- treat uint8 arrays as strings (much faster, tables/arrays are slow in Lua)
-
+         simROS.publisherTreatUInt8ArrayAsString(cameraPub) 
+         simROS.publisherTreatUInt8ArrayAsString(cameraPub2)
+         -- treat uint8 arrays as strings (much faster, tables/arrays are slow in Lua)
+         
        -- leftMotorSub = simROS.subscribe('/'..leftMotorTopicName, 'std_msgs/Float32', 'setLeftMotorVelocityCallback')
         --rightMotorSub = simROS.subscribe('/'..rightMotorTopicName, 'std_msgs/Float32', 'setRightMotorVelocityCallback')
         
@@ -68,7 +73,7 @@ end
 function sysCall_sensing()
     
         if simROS then   
-        -- Publish the image of the active vision sensor:
+        -- Publish the image of the vision sensors
         local data,w,h=sim.getVisionSensorCharImage(frontCamera)
         d={}
         d['header']={stamp=simROS.getTime(), frame_id="a"}
@@ -79,6 +84,18 @@ function sysCall_sensing()
         d['step']=w*3
         d['data']=data
         simROS.publish(cameraPub,d)
+ 
+        -- now for the second camera
+        local data2,w2,h2=sim.getVisionSensorCharImage(frontCamera2)
+        d2={}
+        d2['header']={stamp=simROS.getTime(), frame_id="b"}
+        d2['height']=h2
+        d2['width']=w2
+        d2['encoding']='rgb8'
+        d2['is_bigendian']=1
+        d2['step']=w*3
+        d2['data']=data2
+        simROS.publish(cameraPub2, d2)
     end
     
         frontDistance = getSonarDistance(frontSonar)
