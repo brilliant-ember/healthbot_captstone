@@ -43,5 +43,24 @@ To check if your urdf is correct use this command
 
 There are many 'partial' models, both in the sdf and the urdf dirs, but the main robot model is the 'healthbot' model, everything else is just kept there for reference
 
+# I switched to orbslam
+openvslam got shutdown so I had to switch to orbslam here are the instructions on how to run it below
+
+follow this but u can run the built in r200 mono launch file
+ https://medium.com/@mhamdaan/implementing-orb-slam-on-ubuntu-18-04-ros-melodic-606e668deffa
+camera calibration 
+`rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.26 image:=/usb_cam/image_raw camera:=/usb_cam --no-service-check`
+- if u wanna test your own camera make sure to calibrate it and put the camera.yaml file to the parameter server ( u can use the medium tutorial above, it has a section on how to do it)
+- run rviz with the config file in the orbslam2 and you will see params that you can edit
+- my launch file has a bunch of remaps this is cuz my camera publishes to topic /usb_cam, while the code listens to topic /camera
+
+## how to run
+1. open the usb camera using `roslaunch usb_cam my_usb_cam_test.launch`
+2. open orbslam2 docker (the ros fork, not the main repo) and launch the r200 mono launch file (or whatever launch file u made) 
+	2-1. `docker run -it --name orbslam --net=host bd0dd564b380` or if u already have the stopped container then just do `docker start -i the-container-id`
+	2-2.`roslaunch orb_slam2_ros myLaunch.launch`
+3. open rviz with the mono config that I made, it is in the config dir
+`rviz -d ./rviz_config_mono.rviz`
+
 ## Misc
 This is not important, but if u have troubles with gazebo make sure `GAZEBO_RESOURCE_PATH` has the path to the sdf file if you will load from sdf.
