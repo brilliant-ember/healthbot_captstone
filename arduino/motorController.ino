@@ -4,7 +4,7 @@
 // from maxpwm and this new pwm didn't give me any short circuts, this pwm subtraction can add/remove shortcircuits in my case. the value was found experimatnaly
 // // the lower the pwm the more you can hear it humming, both motors had different minimun PWM
 // any lower than this value then one of them will hum and won't spin ( using L298n motor drive board)
-const int MAXPWM = 1023 - 50;
+const int MAXPWM = 1023 - 70;
 const int MINPWM = 350;
 
 // pwm doubles for the enable pin

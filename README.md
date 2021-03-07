@@ -62,5 +62,7 @@ camera calibration
 3. open rviz with the mono config that I made, it is in the config dir
 `rviz -d ./rviz_config_mono.rviz`
 
+## Motor Control
+![](screenshots/2021-03-07-13-38-36.png)*motor control connections, without sensors*
 ## Misc
 This is not important, but if u have troubles with gazebo make sure `GAZEBO_RESOURCE_PATH` has the path to the sdf file if you will load from sdf.
