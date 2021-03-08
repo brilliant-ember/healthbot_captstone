@@ -1,0 +1,12 @@
+# pack-refs with: peeled fully-peeled sorted 
+191273a1c029a885a320d77eefe3e191b6a292bd refs/remotes/origin/dense_map
+79a1ffdb90a26a605b89fc8ec784ecb34f29031c refs/remotes/origin/devel
+8abda13cf6fc1c8c53be9a991a63a0dcfcb28ef2 refs/remotes/origin/docker
+0f964c618a2e0b7715c1c6fc49e6b70b2ba2c904 refs/remotes/origin/eloquent-devel
+99f81afa06e63bf72d5e7600f393013ac4d3f854 refs/remotes/origin/master
+0f964c618a2e0b7715c1c6fc49e6b70b2ba2c904 refs/remotes/origin/ros2
+58b64c6854be2d8381ac2c0e341fc146ce7d848c refs/remotes/origin/save-load
+4368278d5ebe6b1866460b30243cbb41c2142ed3 refs/tags/v1.0
+c67a6c49f6b05b1b12d8920a1a3e977cb98058a0 refs/tags/v1.1
+b507ce88baa34f8dc6d6dbf08328e033dc407262 refs/tags/v1.1.1
+09b82abf3121351c1f9b0bdff6e7da7558a23531 refs/tags/v1.2
