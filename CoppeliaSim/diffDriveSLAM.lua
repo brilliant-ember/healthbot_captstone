@@ -14,12 +14,6 @@ function sysCall_init()
     frontCamera = sim.getObjectHandle('frontCamera')
     frontCamera2 = sim.getObjectHandle('frontCamera2')
     --odometry = sim.getObjectHandle('odometry')
-    
-    -- init odometry
-   -- position_odometry = sim.getObjectPosition(odometry, -1)
-   -- orientation_odometry = sim.getObjectOrientation(odometry, -1)
-   -- pose_odometry = {position_odometry[1], position_odometry[2], position_odometry[3]}
-   
 
     -- Constants
     sonarMaxRange = 0.4 
@@ -84,58 +78,16 @@ function sysCall_actuation()
     -- put your actuation code here
 end
 
------function get_odometry()
--- ideal, doesnt factor odometry drift or sensor noise
-    --- local result, wL, wR, thetaL, thetaR
-    -- result, wL = sim.getObjectFloatParameter(lJoint, sim.jointfloatparam_velocity)
-    --result, wR = sim.getObjectFloatParameter(rJoint, sim.jointfloatparam_velocity)
- --   deltaTime = sim.getSimulationTimeStep()
-   -- thetaL = wL * deltaTime * wheelRadius
-    --thetaR = wR * deltaTime * wheelRadius
-
--- end
-
---function update_odometry(pose)
-  --  local x,y, theta
-    --x = pose[1]
-    --y = pose[2]
-    --theta = pose[3]
-    
-   -- sim.getObjectPosition(odometry, -1, {x, y,0})
-    --sim.getObjectOrientation(odometry, -1, {0,0,theta})
-    --return pose
---end
-
---function for tf publications https://forum.coppeliarobotics.com/viewtopic.php?t=6198
-function getTransformStamped(objHandle,name,relTo,relToName)
-
-    t=sim.getSystemTime()
-    p=sim.getObjectPosition(objHandle,relTo)
-    o=sim.getObjectQuaternion(objHandle,relTo)
-    return {
-        header={
-            stamp=t,
-            frame_id=relToName
-        },
-        child_frame_id=name,
-        transform={
-            -- ROS has definition x=front y=side z=up
-            translation={x=p[1],y=p[2],z=p[3]},--V-rep
-            rotation={x=o[1],y=o[2],z=o[3],w=o[4]}--v-rep
-        }
-    }
-end
 
 function publish_odometry()
---from https://forum.coppeliarobotics.com/viewtopic.php?t=5694
-    local tf_world_car=getTransformStamped(robotHandle,'base_link',-1,'world')
-    local linearVelocity, angularVelocity= simGetObjectVelocity(robotHandle)
+    tf_world_car=getTransformStamped(robotHandle,'base_link',-1,'world')
+    linearVelocity, angularVelocity= sim.getObjectVelocity(robotHandle)
 
-    local odom = 
+    odom = 
     {
         header=
         {
-            stamp= simGetSimulationTime(),
+            stamp= sim.getSimulationTime(),
             frame_id= 'world'
         },
         child_frame_id= 'base_link',
@@ -185,7 +137,7 @@ function publish_camerainfo(w, h)
     view_angle = 60*math.pi/180
     --sim.visionfloatparam_perspective_angle (1004): float parameter : perspective projection angle
     viewing_angle_id = 1004
-    simGetObjectFloatParameter(frontCamera, viewing_angle_id, view_angle)
+    sim.getObjectFloatParameter(frontCamera, viewing_angle_id, view_angle)
     f_x = (w/2)/math.tan(view_angle/2);
     f_y = f_x;
     CameraInfo={}
@@ -224,8 +176,6 @@ function sysCall_sensing()
         
         -- I am only using one camera for now, so only publishh its info
         publish_camerainfo(w,h)
-        -- odometry data
-        publish_odometry()
  
         -- now for the second camera
         local data2,w2,h2=sim.getVisionSensorCharImage(frontCamera2)
