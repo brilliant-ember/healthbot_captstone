@@ -62,6 +62,14 @@ camera calibration
 3. open rviz with the mono config that I made, it is in the config dir
 `rviz -d ./rviz_config_mono.rviz`
 
+
+# Run SLAM with coppelliaSIM simlation instead of real robot
+it is the same as how to run steps from above, only that we are doing it with coppeliasim instead of
+real camera
+1. run the copelliaSim folder that has slam in its name
+2. run the orb slam launch file roslaunch src/orb_slam_2_ros/ros/launch/mySimulationLaunch.launch 
+3. run rviz just like from above
+
 ## Motor Control
 ![](screenshots/2021-03-07-13-38-36.png)*motor control connections, without sensors*
 ## Misc
