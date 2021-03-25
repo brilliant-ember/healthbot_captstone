@@ -1,4 +1,17 @@
-// constantss
+/**
+ * Mohammed Al-Ameen
+ * 
+ * NodeMCU ESP8266EX motor driver code using L298n driver board and two JGA25-370 motors that come with gearbox and hall sensor for motor encoding.
+ * In my case only the yellow encoder was working for both motors, and so only accounted for the yellow encoder in the code. The program can
+ * detect forward and reverse spin and update odometry accordingly, however, it can't detect spin direction when there is 
+ * manual spinning of the wheel since there's only one hall sensor working.
+ * 
+ * No warranties or guarantees whatsoever, use at your own risk. tip, make sure you have short circuit protection at your power source.
+ * 
+ */
+
+
+// constants
 
 // MAXPWM gives us 100% duty cycle on the default setting of the nodeMCU, but I get short circuits when I run the turn_test() function, so I subtract a number
 // from maxpwm and this new pwm didn't give me any short circuts, this pwm subtraction can add/remove shortcircuits in my case. the value was found experimatnaly
@@ -14,15 +27,32 @@ const int right_pwm = 13;
 // Motor A connections (left wheel)
 const int in1 = 12;
 const int in2 = 14;
+const int lencoder = 3; // this is the yellow wire
+
 // Motor B connections (right wheel)
 const int in3 = 5;
 const int in4 = 4;
+const int rencoder = 0;
 
-// without this delay the control pins short circuit the power source when they flipping flip direction (when you try to go left and right)
-// also you can't switch going from forward to back (or opposite) without waiting for motor to stop, otherwise u get a short circuit in the source
+//  odometry values
+int lencoder_pos = 0;
+int rencoder_pos = 0;
+
+// these 4 flags help us determing odomotry direction with just one hall sensor instead of two
+// when all of them are false then both motors are stopped.
+// can never have both left forward and left reverse as true at the same time, if so, then there's something wrong
+bool is_left_forward = false;
+bool is_right_forward = false;
+bool is_left_reverse = false;
+bool is_right_reverse = false;
+
+// optional parameters
 const int turn_delay = 0;
 const int spin_direction_change_delay = 0;
 const int debug_delay = 1000;
+const bool enable_debug_msgs = true;
+const bool enable_debug_odometer_msgs = true;
+
 
 void setup() {
   Serial.begin(115200);
@@ -31,14 +61,49 @@ void setup() {
   pinMode(in2, OUTPUT);
   pinMode(in3, OUTPUT);
   pinMode(in4, OUTPUT);
+  pinMode(lencoder, INPUT);
+  pinMode(rencoder, INPUT);
 
   // Turn off motors, Initial state
   turn_off_motors_force();
-  //direction_test();
+
+  attachInterrupt(digitalPinToInterrupt(lencoder), update_lencoder, RISING);
+  attachInterrupt(digitalPinToInterrupt(rencoder), update_rencoder, RISING);
 }
 
 void loop() {
   test_motor_drive();
+
+}
+
+ICACHE_RAM_ATTR void update_lencoder() {
+
+  if (is_left_motor_going_forward()) {
+    lencoder_pos++ ;
+  }
+  else if (is_left_motor_going_backward()) {
+    lencoder_pos--;
+  }
+  if (enable_debug_msgs && enable_debug_odometer_msgs) {
+    Serial.print(" Left odometer ");
+    Serial.println(lencoder_pos);
+  }
+
+}
+
+ICACHE_RAM_ATTR void update_rencoder() {
+
+  if (is_right_motor_going_forward()) {
+    rencoder_pos++ ;
+  }
+  else if (is_right_motor_going_backward()) {
+    rencoder_pos--;
+  }
+  if (enable_debug_msgs && enable_debug_odometer_msgs) {
+    printf(" Right odometer ");
+    Serial.println(rencoder_pos);
+  }
+
 
 }
 
@@ -184,21 +249,29 @@ void move_left(int pwm_val) {
 
 void move_right_wheel_forward(int pwm_val) {
   set_right_wheel_spin_forward();
+  is_right_forward = true;
+  is_right_reverse = false;
   set_right_pwm(pwm_val);
 }
 
 void move_left_wheel_forward(int pwm_val) {
   set_left_wheel_spin_forward();
+  is_left_forward = true;
+  is_left_reverse = false;
   set_left_pwm(pwm_val);
 }
 
 void move_right_wheel_backward(int pwm_val) {
   set_right_wheel_spin_backward();
+  is_right_forward = false;
+  is_right_reverse = true;
   set_right_pwm(pwm_val);
 }
 
 void move_left_wheel_backward(int pwm_val) {
   set_left_wheel_spin_backward();
+  is_left_forward = false;
+  is_left_reverse = true;
   set_left_pwm(pwm_val);
 }
 
@@ -248,12 +321,56 @@ void set_right_wheel_spin_forward() {
   digitalWrite(in4, HIGH);
 }
 
+bool is_right_motor_going_forward() {
+  // checks only the software config for motor, doesn't take feedback from hardware sensors
+  // so doesnt check of the motor is actually spinning or not, or if there's a hardware break.
+  if (is_right_forward && !is_right_reverse) {
+    return true;
+  }
+  return false;
+
+}
+
+bool is_right_motor_going_backward() {
+  // checks only the software config for motor, doesn't take feedback from hardware sensors
+  // so doesnt check of the motor is actually spinning or not, or if there's a hardware break.
+  if (!is_right_forward && is_right_reverse) {
+    return true;
+  }
+  return false;
+
+}
+
+bool is_left_motor_going_forward() {
+  // checks only the software config for motor, doesn't take feedback from hardware sensors
+  // so doesnt check of the motor is actually spinning or not, or if there's a hardware break.
+  if (is_left_forward && !is_left_reverse) {
+    return true;
+  }
+  return false;
+
+}
+
+bool is_left_motor_going_backward() {
+  // checks only the software config for motor, doesn't take feedback from hardware sensors
+  // so doesnt check of the motor is actually spinning or not, or if there's a hardware break.
+  if (!is_left_forward && is_left_reverse) {
+    return true;
+  }
+  return false;
+
+}
+
 void turn_off_motors() {
   // turns off by motor control pins, but not by PWM
   digitalWrite(in1, LOW);
   digitalWrite(in2, LOW);
   digitalWrite(in3, LOW);
   digitalWrite(in4, LOW);
+  is_left_forward = false;
+  is_right_forward = false;
+  is_left_reverse = false;
+  is_right_reverse = false;
 }
 
 void turn_off_motors_force() {
