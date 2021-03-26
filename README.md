@@ -71,7 +71,7 @@ real camera
 3. run rviz just like from above
 
 ## Motor Control
-I am using a NodeMCU board, but you can use an arduino or any board instead but make sure to use the correct pins and set the PWM limit for your board, also remove the term`ICACHE_RAM_ATTR` from befor the interrupt functions as that may cause errors depending on what board you're using.
+I am using a NodeMCU board, but you can use an arduino or any board instead but make sure to use the correct pins and set the PWM limit for your board, also remove the term`ICACHE_RAM_ATTR` from befor the interrupt functions as that may cause errors depending on what board you're using. Also if you're using an Arduino Uno change the MAXPWM to 255 and the MINPWM to 0.
 In case you're using a NodeMCU make sure to power _off the motors when you boot or upload code_ to the mcu because having power on certain pins during launch can cause failures and weird behavior for the NodeMCU. Also the pin numbers printed on the board don't match the acutal GPIO numbers, hence different pin numbers in code, use a pin out diagram that has the GPIO pin numbers.
 
 I am only using two hall sensors, one for each motor, so we only need two interupt pins to run the motor encoders for odometry instead of 4 interupt pins
