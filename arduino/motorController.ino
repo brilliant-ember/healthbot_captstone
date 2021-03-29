@@ -1,14 +1,14 @@
 /**
- * Mohammed Al-Ameen
- * 
- * NodeMCU ESP8266EX motor driver code using L298n driver board and two JGA25-370 motors that come with gearbox and hall sensor for motor encoding.
- * In my case only the yellow encoder was working for both motors, and so only accounted for the yellow encoder in the code. The program can
- * detect forward and reverse spin and update odometry accordingly, however, it can't detect spin direction when there is 
- * manual spinning of the wheel since there's only one hall sensor working.
- * 
- * No warranties or guarantees whatsoever, use at your own risk. tip, make sure you have short circuit protection at your power source.
- * 
- */
+   Mohammed Al-Ameen
+
+   NodeMCU ESP8266EX motor driver code using L298n driver board and two JGA25-370 motors that come with gearbox and hall sensor for motor encoding.
+   In my case only the yellow encoder was working for both motors, and so only accounted for the yellow encoder in the code. The program can
+   detect forward and reverse spin and update odometry accordingly, however, it can't detect spin direction when there is
+   manual spinning of the wheel since there's only one hall sensor working.
+
+   No warranties or guarantees whatsoever, use at your own risk. tip, make sure you have short circuit protection at your power source.
+
+*/
 
 
 // constants
@@ -52,6 +52,8 @@ const int spin_direction_change_delay = 0;
 const int debug_delay = 1000;
 const bool enable_debug_msgs = true;
 const bool enable_debug_odometer_msgs = true;
+bool unknown_right_spin_dir = false;
+bool unknown_left_spin_dir = false;
 
 
 void setup() {
@@ -63,9 +65,11 @@ void setup() {
   pinMode(in4, OUTPUT);
   pinMode(lencoder, INPUT);
   pinMode(rencoder, INPUT);
+  Serial.println("Start motor controller");
 
   // Turn off motors, Initial state
   turn_off_motors_force();
+  //direction_test();
 
   attachInterrupt(digitalPinToInterrupt(lencoder), update_lencoder, RISING);
   attachInterrupt(digitalPinToInterrupt(rencoder), update_rencoder, RISING);
@@ -78,30 +82,54 @@ void loop() {
 
 ICACHE_RAM_ATTR void update_lencoder() {
 
+  
+
   if (is_left_motor_going_forward()) {
     lencoder_pos++ ;
+    unknown_left_spin_dir = false;
   }
   else if (is_left_motor_going_backward()) {
     lencoder_pos--;
+    unknown_left_spin_dir = false;
   }
+  else {
+    //unknown_left_spin_dir = true; // false positives happen on brake
+    lencoder_pos++ ;
+  }
+
   if (enable_debug_msgs && enable_debug_odometer_msgs) {
     Serial.print(" Left odometer ");
     Serial.println(lencoder_pos);
+    if (unknown_left_spin_dir) {
+      Serial.println("Warning only 1 hall sensor can't determine spin direction on manuel spin, plz use software commands to spin the wheels");
+    }
   }
+
 
 }
 
 ICACHE_RAM_ATTR void update_rencoder() {
+  
 
   if (is_right_motor_going_forward()) {
     rencoder_pos++ ;
+    unknown_right_spin_dir = false;
   }
   else if (is_right_motor_going_backward()) {
     rencoder_pos--;
+    unknown_right_spin_dir = false;
+  }
+  else {
+   // unknown_right_spin_dir = true; // false positives happen on brake
+    rencoder_pos++ ;
   }
   if (enable_debug_msgs && enable_debug_odometer_msgs) {
-    printf(" Right odometer ");
+    Serial.print(" Right odometer ");
     Serial.println(rencoder_pos);
+    if (unknown_right_spin_dir) {
+      Serial.println("Warning only 1 hall sensor can't determine spin direction on manuel spin, plz use software commands to spin the wheels");
+    }
+
   }
 
 
