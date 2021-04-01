@@ -65,7 +65,6 @@ void setup() {
   pinMode(in4, OUTPUT);
   pinMode(lencoder, INPUT);
   pinMode(rencoder, INPUT);
-  Serial.println("Start motor controller");
 
   // Turn off motors, Initial state
   turn_off_motors_force();
@@ -80,9 +79,17 @@ void loop() {
 
 }
 
-ICACHE_RAM_ATTR void update_lencoder() {
+void reset_encoder(){
+  lencoder_pos = 0;
+  rencoder_pos = 0;
+  }
 
-  
+void send_encoder_ticks(){
+   Serial.print(lencoder_pos); Serial.print("\t");
+   Serial.print(rencoder_pos); Serial.print("\n");
+  }
+
+ICACHE_RAM_ATTR void update_lencoder() {
 
   if (is_left_motor_going_forward()) {
     lencoder_pos++ ;
@@ -109,7 +116,7 @@ ICACHE_RAM_ATTR void update_lencoder() {
 }
 
 ICACHE_RAM_ATTR void update_rencoder() {
-  
+
 
   if (is_right_motor_going_forward()) {
     rencoder_pos++ ;
@@ -120,7 +127,7 @@ ICACHE_RAM_ATTR void update_rencoder() {
     unknown_right_spin_dir = false;
   }
   else {
-   // unknown_right_spin_dir = true; // false positives happen on brake
+    // unknown_right_spin_dir = true; // false positives happen on brake
     rencoder_pos++ ;
   }
   if (enable_debug_msgs && enable_debug_odometer_msgs) {
@@ -139,55 +146,73 @@ void test_motor_drive() {
   // testing crtieria: must perform all tests without shortcircuiting the source, it is recommended that you
   // use shortcircuit protection, if you encounter shortcircuit then increase the number that subtracts from MAXPWM variable
 
-  printf("\n Motor driver test begins \n");
+  if (enable_debug_msgs) {
+    printf("\n Motor driver test begins \n");
+  }
   turn_test();
   direction_test();
   speed_test();
   delay(4000);
-  printf("\n Finished motor driver test \n");
+  if (enable_debug_msgs) {
+    printf("\n Finished motor driver test \n");
+  }
 }
 
 void direction_test() {
   // test direction sping of each wheel
 
-  printf("\nnew direction test\n");
+  if (enable_debug_msgs) {
+    printf("\nnew direction test\n");
+  }
   const int move_delay = debug_delay * 3;
 
   // forward
-  printf("right wheel forward\n");
+  if (enable_debug_msgs) {
+    printf("right wheel forward\n");
+  }
   move_right_wheel_forward(MAXPWM);
   delay(move_delay );
   turn_off_motors();
   delay(move_delay);
 
-  printf("left wheel forward\n");
+  if (enable_debug_msgs) {
+    printf("left wheel forward\n");
+  }
   move_left_wheel_forward(MAXPWM);
   delay(move_delay );
   turn_off_motors();
   delay(move_delay);
 
   //  reverse
-  printf("right wheel backward\n");
+  if (enable_debug_msgs) {
+    printf("right wheel backward\n");
+  }
   move_right_wheel_backward(MAXPWM);
   delay(move_delay );
   turn_off_motors();
   delay(move_delay);
 
-  printf("left wheel backward\n");
+  if (enable_debug_msgs) {
+    printf("left wheel backward\n");
+  }
   move_left_wheel_backward(MAXPWM);
   delay(move_delay );
   turn_off_motors();
   delay(move_delay);
 
   // Turn right
-  printf("Turn right\n");
+  if (enable_debug_msgs) {
+    printf("Turn right\n");
+  }
   move_right(MAXPWM);
   delay(move_delay);
   turn_off_motors();
   delay(move_delay);
 
   // Turn left
-  printf("Turn left\n");
+  if (enable_debug_msgs) {
+    printf("Turn left\n");
+  }
   move_left(MAXPWM);
   delay(move_delay);
   turn_off_motors();
@@ -197,51 +222,75 @@ void direction_test() {
 
 void speed_test() {
   // test speed of the motors
-  printf("\n new speed test\n");
+  if (enable_debug_msgs) {
+    printf("\n new speed test\n");
+  }
   // Accelerate from min speed to max speed
-  printf("Accelerating \n");
+  if (enable_debug_msgs) {
+    printf("Accelerating \n");
+  }
   for (int i = MINPWM; i < MAXPWM; i++) {
     move_forward(i);
     delay(20);
   }
-  printf("Max speed \n");
+  if (enable_debug_msgs) {
+    printf("Max speed \n");
+  }
   delay(debug_delay * 2);
 
   // Decelerate from max speed to min speed
-  printf("Deceleratting \n");
+  if (enable_debug_msgs) {
+    printf("Deceleratting \n");
+  }
   for (int i = MAXPWM; i >= 500; --i) {
     move_forward(i);
     delay(20);
   }
-  printf("Min speed \n");
+  if (enable_debug_msgs) {
+    printf("Min speed \n");
+  }
   delay(debug_delay * 2);
 }
 
 void turn_test() {
   // tests the ability of the robot to turn from right to left, and then from left to right. it should do so without short circuiting the power source.
-  printf("\nnew turn_test \n \n");
-  printf("To the right\n");
+  if (enable_debug_msgs) {
+    printf("\nnew turn_test \n \n");
+  }
+  if (enable_debug_msgs) {
+    printf("To the right\n");
+  }
   set_right_wheel_spin_backward();
   set_left_wheel_spin_forward();
-  printf("Finished setting control pins, will set pwm now\n");
+  if (enable_debug_msgs) {
+    printf("Finished setting control pins, will set pwm now\n");
+  }
   delay(debug_delay);
   set_right_pwm(MAXPWM);
   set_left_pwm(MAXPWM);
   delay(debug_delay * 3);
   turn_off_motors_force();
-  printf("Finished right\n");
+  if (enable_debug_msgs) {
+    printf("Finished right\n");
+  }
   delay(debug_delay * 2);
 
-  printf("To the left\n");
+  if (enable_debug_msgs) {
+    printf("To the left\n");
+  }
   set_left_wheel_spin_backward();
   set_right_wheel_spin_forward();
-  printf("Finished setting control pins, will set pwm now\n");
+  if (enable_debug_msgs) {
+    printf("Finished setting control pins, will set pwm now\n");
+  }
   delay(debug_delay);
   set_right_pwm(MAXPWM);
   set_left_pwm(MAXPWM);
   delay(debug_delay * 3);
   turn_off_motors_force();
-  printf("Finished left\n");
+  if (enable_debug_msgs) {
+    printf("Finished left\n");
+  }
   delay(debug_delay * 2);
 }
 
@@ -313,7 +362,9 @@ void set_right_pwm(int pwm_val) {
 
 void set_reverse_spin() {
   // changes the wheel spin direction
-  printf("reverse \n");
+  if (enable_debug_msgs) {
+    printf("reverse \n");
+  }
   set_left_wheel_spin_backward();
   set_right_wheel_spin_backward();
 }
@@ -332,7 +383,9 @@ void set_right_wheel_spin_backward() {
 
 void set_forward_spin() {
   // changes the wheel spin direction
-  printf("forward \n");
+  if (enable_debug_msgs) {
+    printf("forward \n");
+  }
   set_left_wheel_spin_forward();
   set_right_wheel_spin_forward();
 }

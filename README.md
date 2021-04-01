@@ -75,6 +75,30 @@ I am using a NodeMCU board, but you can use an arduino or any board instead but 
 In case you're using a NodeMCU make sure to power _off the motors when you boot or upload code_ to the mcu because having power on certain pins during launch can cause failures and weird behavior for the NodeMCU. Also the pin numbers printed on the board don't match the acutal GPIO numbers, hence different pin numbers in code, use a pin out diagram that has the GPIO pin numbers.
 
 I am only using two hall sensors, one for each motor, so we only need two interupt pins to run the motor encoders for odometry instead of 4 interupt pins
-![](screenshots/2021-03-25-19-17-35.png)*motor control connections, without sensors*
+![](screenshots/2021-03-25-19-17-35.png)*motor control connections, without sensors*last_time
+
+### Odometry calculation
+[this blog was good ](https://hackernoon.com/feedback-odometry-courseras-control-of-mobile-robots-with-ros-and-rosbots-part-3-e9d8e4df6df1 )and also [the youtbe tutorial by adventures in STEM](https://www.youtube.com/watch?v=oLBYHbLO8W0)
+
+
+For my motor I have:
+- gear box ratio 1:21, so for each wheel rotation (output) I have 21 motor rotations. 21 motor revs = 1 output rev
+- 11 pulses (ticks) per motor revlotion
+- 21 x 11 = 231 pulses per wheel rev
+- wheel diameter = 6.5 cm
+- distnace convered per 1 wheel rev = diameter * pi = 20.4 cm 
+- 231 pulses = 20.4 cm, so 1 pulse = 0.08cm, so to go 1 meter we have 1250 pulses
+- distance between wheels is 17cm
+So we get __distnace traveled per wheel = Diameter*pi*counted ticks/231__ or _deltaX = d*pi*ticks/tickesPerRev_
+now we need linear velocity and angular velocity w, go to the blog post I put it has a neat explanation 
+
+## Battery and Power
+### current draw
+- motor stall at 12v = 1.2 A
+- nodeMCU max at 5v = 0.4A
+- dragon board at 5v usb max = 0.9A
+- total = 2.5A , my lipo is 3.3A so I am good
+
+
 ## Misc
 This is not important, but if u have troubles with gazebo make sure `GAZEBO_RESOURCE_PATH` has the path to the sdf file if you will load from sdf.
