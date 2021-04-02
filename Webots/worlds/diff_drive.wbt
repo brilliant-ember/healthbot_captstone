@@ -1,0 +1,103 @@
+#VRML_SIM R2021a utf8
+WorldInfo {
+  coordinateSystem "NUE"
+}
+Viewpoint {
+  orientation 0.046067601132846046 -0.9987599159315077 -0.018878730210281754 4.669843980565735
+  position 2.8827207520163527 0.5730684206418318 -0.419631796150133
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  floorSize 2 2
+}
+Robot {
+  translation 0 -0.05 -0.24
+  children [
+    DEF joint2 HingeJoint {
+      jointParameters HingeJointParameters {
+        anchor -0.04 0.09 0.11
+      }
+      device [
+        PositionSensor {
+          name "encoder_2"
+        }
+        RotationalMotor {
+          name "motor_2"
+        }
+      ]
+      endPoint Solid {
+        translation -0.04013978899258916 0.0900683705596536 0.1100729549801482
+        rotation -0.15824032677463176 -0.1534954349162001 -0.9753969194344139 1.6136301862983191
+        children [
+          DEF Wheel Shape {
+            appearance PBRAppearance {
+            }
+            geometry Cylinder {
+              height 0.01
+              radius 0.0325
+            }
+          }
+        ]
+        name "solid(1)"
+        boundingObject USE Wheel
+        physics DEF wheel_physics Physics {
+        }
+      }
+    }
+    DEF body Transform {
+      translation 0 0.113146 0.134158
+      rotation 1 0 0 0.19
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.12549 0.290196 0.529412
+            roughness 1
+            metalness 0
+          }
+          geometry Box {
+            size 0.07 0.03 0.2
+          }
+        }
+      ]
+    }
+    HingeJoint {
+      jointParameters HingeJointParameters {
+        anchor 0.04 0.09 0.11
+      }
+      device [
+        PositionSensor {
+          name "encoder_1"
+        }
+        RotationalMotor {
+          name "motor_1"
+        }
+      ]
+      endPoint Solid {
+        translation 0.040170864938211176 0.09009364726374593 0.10992261810362075
+        rotation 0.019064813322447485 0.012643184426737052 -0.9997383071486917 1.5655441668096919
+        children [
+          DEF Wheel Shape {
+            appearance PBRAppearance {
+            }
+            geometry Cylinder {
+              height 0.01
+              radius 0.0325
+            }
+          }
+        ]
+        boundingObject USE Wheel
+        physics DEF wheel_physics Physics {
+        }
+      }
+    }
+  ]
+  name "differential wheels"
+  boundingObject USE body
+  physics Physics {
+  }
+  controller "my_controller"
+  cpuConsumption 0
+}
