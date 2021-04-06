@@ -1,7 +1,50 @@
 # Capstone project healthbot
 
-The Ros and gazebo files are in the src dir, the coppeliaSim files in the coppeliaSim dir
+## PID control
+this package is used http://wiki.ros.org/pid
+to start PID control with coppeliasim
+1. start roscore
+2. open coppeliasim file `rosControllerCoppeliaSimDiffDrivettt.ttt`
+3. `roslaunch motor_control pid_coppeliaSim.launch`
+4. run this file hbot_ws/src/motor_control/src/pid_simulation.py
+5. For manuel tunning use `rosrun rqt_reconfigure rqt_reconfigure`
 
+
+## Motor Control
+I am using a NodeMCU board, but you can use an arduino or any board instead but make sure to use the correct pins and set the PWM limit for your board, also remove the term`ICACHE_RAM_ATTR` from befor the interrupt functions as that may cause errors depending on what board you're using. Also if you're using an Arduino Uno change the MAXPWM to 255 and the MINPWM to 0.
+In case you're using a NodeMCU make sure to power _off the motors when you boot or upload code_ to the mcu because having power on certain pins during launch can cause failures and weird behavior for the NodeMCU. Also the pin numbers printed on the board don't match the acutal GPIO numbers, hence different pin numbers in code, use a pin out diagram that has the GPIO pin numbers.
+
+I am only using two hall sensors, one for each motor, so we only need two interupt pins to run the motor encoders for odometry instead of 4 interupt pins
+![](screenshots/2021-03-25-19-17-35.png)*motor control connections, without sensors*last_time
+
+### Odometry calculation
+[this blog was good ](https://hackernoon.com/feedback-odometry-courseras-control-of-mobile-robots-with-ros-and-rosbots-part-3-e9d8e4df6df1 )and also [the youtbe tutorial by adventures in STEM](https://www.youtube.com/watch?v=oLBYHbLO8W0)
+
+
+For my motor I have:
+- gear box ratio 1:21, so for each wheel rotation (output) I have 21 motor rotations. 21 motor revs = 1 output rev
+- 11 pulses (ticks) per motor revlotion
+- 21 x 11 = 231 pulses per wheel rev
+- wheel diameter = 6.5 cm
+- distnace convered per 1 wheel rev = diameter * pi = 20.4 cm 
+- 231 pulses = 20.4 cm, so 1 pulse = 0.08cm, so to go 1 meter we have 1250 pulses
+- distance between wheels is 17cm
+So we get __distnace traveled per wheel = Diameter*pi*counted ticks/231__ or _deltaX = d*pi*ticks/tickesPerRev_
+now we need linear velocity and angular velocity w, go to the blog post I put it has a neat explanation 
+
+## Battery and Power
+### current draw
+- motor stall at 12v = 1.2 A
+- nodeMCU max at 5v = 0.4A
+- dragon board at 5v usb max = 0.9A
+- total = 2.5A , my lipo is 3.3A so I am good
+
+
+---
+
+
+# Legacy information, kept for old project reference
+The Ros and gazebo files are in the src dir, the coppeliaSim files in the coppeliaSim dir
 ## Navigation
 Basic object detection is made with ultrasonic
 OpenVslam is used for one camera navigation
@@ -70,35 +113,8 @@ real camera
 2. run the orb slam launch file roslaunch src/orb_slam_2_ros/ros/launch/mySimulationLaunch.launch 
 3. run rviz just like from above
 
-## Motor Control
-I am using a NodeMCU board, but you can use an arduino or any board instead but make sure to use the correct pins and set the PWM limit for your board, also remove the term`ICACHE_RAM_ATTR` from befor the interrupt functions as that may cause errors depending on what board you're using. Also if you're using an Arduino Uno change the MAXPWM to 255 and the MINPWM to 0.
-In case you're using a NodeMCU make sure to power _off the motors when you boot or upload code_ to the mcu because having power on certain pins during launch can cause failures and weird behavior for the NodeMCU. Also the pin numbers printed on the board don't match the acutal GPIO numbers, hence different pin numbers in code, use a pin out diagram that has the GPIO pin numbers.
-
-I am only using two hall sensors, one for each motor, so we only need two interupt pins to run the motor encoders for odometry instead of 4 interupt pins
-![](screenshots/2021-03-25-19-17-35.png)*motor control connections, without sensors*last_time
-
-### Odometry calculation
-[this blog was good ](https://hackernoon.com/feedback-odometry-courseras-control-of-mobile-robots-with-ros-and-rosbots-part-3-e9d8e4df6df1 )and also [the youtbe tutorial by adventures in STEM](https://www.youtube.com/watch?v=oLBYHbLO8W0)
-
-
-For my motor I have:
-- gear box ratio 1:21, so for each wheel rotation (output) I have 21 motor rotations. 21 motor revs = 1 output rev
-- 11 pulses (ticks) per motor revlotion
-- 21 x 11 = 231 pulses per wheel rev
-- wheel diameter = 6.5 cm
-- distnace convered per 1 wheel rev = diameter * pi = 20.4 cm 
-- 231 pulses = 20.4 cm, so 1 pulse = 0.08cm, so to go 1 meter we have 1250 pulses
-- distance between wheels is 17cm
-So we get __distnace traveled per wheel = Diameter*pi*counted ticks/231__ or _deltaX = d*pi*ticks/tickesPerRev_
-now we need linear velocity and angular velocity w, go to the blog post I put it has a neat explanation 
-
-## Battery and Power
-### current draw
-- motor stall at 12v = 1.2 A
-- nodeMCU max at 5v = 0.4A
-- dragon board at 5v usb max = 0.9A
-- total = 2.5A , my lipo is 3.3A so I am good
 
 
 ## Misc
 This is not important, but if u have troubles with gazebo make sure `GAZEBO_RESOURCE_PATH` has the path to the sdf file if you will load from sdf.
+https://roboticsbackend.com/oop-with-ros-in-python/ -- good example code

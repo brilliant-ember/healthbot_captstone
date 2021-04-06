@@ -93,8 +93,12 @@ function controlWheels(msg)
     local vr = msg['data'][1]
     local vl = msg['data'][2]
     print({"ros_sub, vr: ", vr, "vl:", vl})
+    -- give some reallife error, math.random gives num btwn 0 and 1
+    vr = vr + math.random() 
+    vl = vl + math.random() 
     sim.setJointTargetVelocity(rJoint, vr)
     sim.setJointTargetVelocity(lJoint, vl)
+    print({"applied, vr: ", vr, "vl:", vl})
 end
 
 function sysCall_actuation()

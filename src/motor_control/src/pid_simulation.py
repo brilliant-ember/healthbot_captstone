@@ -12,7 +12,7 @@ from geometry_msgs.msg import Point, Pose, Quaternion, Twist, Vector3
 from std_msgs.msg import Float32MultiArray, Float64
 
 # constants
-raw_speed = 1  # this is the linear velocity
+raw_speed = 3  # this is the linear velocity
 wheel_radius = 0.0325  # 3cm but in meters
 wheel_cirumference = 2 * 3.14 * wheel_radius
 L = 0.07  # distace between wheels 7cm
@@ -28,6 +28,7 @@ right_wheel_velocity = 0.0
 left_ns = 'left_wheel'#left wheel namespace
 right_ns = 'right_wheel'#right wheel namespace
 target_omega = 0
+previous_time = 0
 # publishers
 ## publishers to PID node 
 setpoint_pub_right = None
@@ -37,9 +38,10 @@ feedback_encoder_pub_left = None
 ## publishers to coppeliasim
 wheel_vel_pub = None
 ## debug
-print_pub_log = False
+print_pub_log = True
 print_debug_log = False
 print_sub_log = False
+print_verbose_pub = False
 
 def init_simulation_publishers():
     global setpoint_pub_right, setpoint_pub_left, feedback_encoder_pub_right, feedback_encoder_pub_left, wheel_vel_pub
@@ -60,14 +62,11 @@ def init_simulation_listeners():
 def encoder_callback(data):
     ''' gets feedback data from coppeliaSim sensors and publishes drive commands back'''
     if print_sub_log:
-        ospy.loginfo("received data")
+        rospy.loginfo("received data")
     # this is angular speed from the simulation feedback sensor
     wR = data.data[0]  # right motor angular speed
     wL = data.data[1]  # left motor angular speed
-    wd = pi/2
     publish_feedback_pid(wR, wL) # publish the feedback so the pid controller node can compensate
-    vr, vl = calculate_desired_velocities(wd)
-    publish_pid_input(vr, vl)
 
 def sim_right_velocity_callback(v):
     ''' publishes pid commands to the coppeliasim simulation'''
@@ -84,7 +83,7 @@ def sim_left_velocity_callback(v):
 
 def publish_pid_input(desired_vr, desired_vl):
     '''publishes the desired input to the control loop'''
-    global setpoint_pub_right, setpoint_pub_left, feedback_encoder_pub_right, feedback_encoder_pub_left, wheel_vel_pub
+    global setpoint_pub_right, setpoint_pub_left
     my_msg = Float64()
     my_msg2 = Float64()
     my_msg.data =desired_vr
@@ -97,7 +96,7 @@ def publish_pid_input(desired_vr, desired_vl):
 
 def publish_feedback_pid(vr,vl):
     '''publishes the feedback to the PID controller node'''
-    global setpoint_pub_right, setpoint_pub_left, feedback_encoder_pub_right, feedback_encoder_pub_left, wheel_vel_pub
+    global feedback_encoder_pub_right, feedback_encoder_pub_left
     my_msg = Float64()
     my_msg2 = Float64()
     my_msg.data =vr
@@ -105,7 +104,7 @@ def publish_feedback_pid(vr,vl):
     if not rospy.is_shutdown():
         feedback_encoder_pub_right.publish(my_msg)
         feedback_encoder_pub_left.publish(my_msg2)
-        if print_pub_log:
+        if print_pub_log and print_verbose_pub: 
             rospy.loginfo("published encoder feedback vr {}, vl {}".format(vr,vl))
     else:
         rospy.logerr("rospy is shutdown, didnt publish")
@@ -146,12 +145,9 @@ def calculate_desired_velocities(desired_w):
     v_lin = radius/2(vr + vl) eq 1
     v_ang = radius/distance_btwn_wheels (vr - vl)
     do the math and you will have two equations for vl and vr get the desired_w from the pid, this is like the ref signal'''
-    # init wheels speed based on raw_speed plus some real life error.
-    # randint gives some reallife error
-    left_speed = raw_speed + (5 * (randint(1, 10)/10))
-    right_speed = raw_speed + (0.9 * (randint(1, 10)/10))
-    vr = (desired_w*L + 2*right_speed)/(2*wheel_radius)
-    vl = (2*left_speed - desired_w*L)/(2*wheel_radius)
+
+    vr = (desired_w*L + 2*raw_speed)/(2*wheel_radius)
+    vl = (2*raw_speed - desired_w*L)/(2*wheel_radius)
     rate_limiter = 0.015 # to avoid saturating the vel, reduce it to x%
     vr, vl = vr*rate_limiter, vl*rate_limiter
     if print_debug_log:
@@ -163,6 +159,81 @@ def calculate_desired_velocities(desired_w):
     return (vr, vl)
     
 
+
+def open_loop_driving(cmd):
+    '''takes 'right', 'left', 'stright', 'stop' strings as commands, and publishes 
+    vr and vl needed'''
+    if cmd == "right":
+        vl = -raw_speed
+        vr = raw_speed
+    elif cmd == "left":
+        vr = -raw_speed
+        vl = raw_speed
+    elif cmd == "stright":
+        vr = raw_speed
+        vl = raw_speed
+    elif cmd == "stop":
+        vr, vl = 0,0
+    else:
+        rospy.logerr("error invalid command, will stop")
+        vr, vl = 0,0
+    publish_simulation_command(vr, vl)
+
+def closed_loop_driving(cmd):
+    '''takes 'right', 'left', 'stright', 'stop' strings as commands, and publishes 
+    vr and vl needed to the PID controller, which then publishes and triggers a callback (in this same file) that translates the 
+    PID to something coppeliasim can understand'''
+    if cmd == "right":
+        vl = -raw_speed
+        vr = raw_speed
+    elif cmd == "left":
+        vr = -raw_speed
+        vl = raw_speed
+    elif cmd == "stright":
+        vr = raw_speed
+        vl = raw_speed
+    elif cmd == "stop":
+        vr, vl = 0,0
+    else:
+        rospy.logerr("error invalid command, will stop")
+        vr, vl = 0,0
+    publish_pid_input(vr, vl)
+
+def test_drive_commands_open_loop():
+    global previous_time
+    dt = int(time.time()) - previous_time
+    # print(dt)
+    if dt <= 4:
+        open_loop_driving('stright')
+    elif dt <= 5:
+        open_loop_driving("stop")
+    elif dt <= 6:
+        open_loop_driving("right")
+    elif dt <= 8:
+        open_loop_driving("stop")
+    elif dt <=9:
+        open_loop_driving("stright")
+    else:
+        previous_time = int(time.time())
+
+def test_drive_commands_closed_loop():
+    global previous_time
+    dt = int(time.time()) - previous_time
+    # print(dt)
+    if dt <= 4:
+        closed_loop_driving('stright')
+    elif dt <= 5:
+        closed_loop_driving("stop")
+    elif dt <= 6:
+        closed_loop_driving("right")
+    elif dt <= 8:
+        closed_loop_driving("stop")
+    elif dt <=9:
+        closed_loop_driving("stright")
+    else:
+        previous_time = int(time.time())
+
+
 if __name__ == '__main__':
     try:
         node_name = "diff_drive_head"
@@ -173,9 +244,14 @@ if __name__ == '__main__':
         init_simulation_publishers()
         rate= rospy.Rate(10)
         target_omega = 0
+        previous_time = int(time.time())
         while not rospy.is_shutdown():
-            vr, vl = calculate_desired_velocities(target_omega)
-            publish_simulation_command(vr, vl)
+            # vr, vl = calculate_desired_velocities(target_omega)
+            # vr, vl = 1, 1
+            # publish_pid_input(vr, vl)
+            # publish_simulation_command(vr, vl)
+            test_drive_commands_open_loop()
+            # test_drive_commands_closed_loop()
             rate.sleep()
         rospy.spin()
         
