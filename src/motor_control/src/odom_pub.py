@@ -25,7 +25,7 @@ def get_linear_velocity(left_wheel_distance, right_wheel_distance, time):
     return (left_wheel_distance + right_wheel_distance)/time
 
 def get_angular_velocity(left_wheel_distance, right_wheel_distance, time):
-    '''ang velocity, clock wise direction os positive '''
+    '''ang velocity, counterclock wise direction is positive '''
     return ( right_wheel_distance - left_wheel_distance)/time
 
 rospy.init_node('odometry_publisher')
