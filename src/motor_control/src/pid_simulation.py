@@ -25,10 +25,27 @@ previous_error = 0
 previous_time = time.time()  # used to calculate time delta
 left_wheel_velocity = 0.0
 right_wheel_velocity = 0.0
-
 left_ns = 'left_wheel'#left wheel namespace
 right_ns = 'right_wheel'#right wheel namespace
+target_omega = 0
+# publishers
+## publishers to PID node 
+setpoint_pub_right = None
+setpoint_pub_left = None
+feedback_encoder_pub_right = None
+feedback_encoder_pub_left = None
+## publishers to coppeliasim
+wheel_vel_pub = None
 
+def init_simulation_publishers():
+    global setpoint_pub_right, setpoint_pub_left, feedback_encoder_pub_right, feedback_encoder_pub_left, wheel_vel_pub
+    #for pid controller
+    setpoint_pub_right = rospy.Publisher(right_ns+"/setpoint", Float64, queue_size=queue_size)
+    setpoint_pub_left = rospy.Publisher(left_ns+"/setpoint", Float64, queue_size=queue_size)
+    feedback_encoder_pub_right = rospy.Publisher(right_ns+"/state", Float64, queue_size=queue_size)
+    feedback_encoder_pub_left = rospy.Publisher(left_ns+"/state", Float64, queue_size=queue_size)
+    # for coppeliasim
+    wheel_vel_pub = rospy.Publisher("vel_wheels", Float32MultiArray, queue_size=queue_size)
 def encoder_callback(data):
     # gets feedback data from coppeliaSim sensors and publishes drive commands back
     rospy.loginfo("received data")
@@ -67,49 +84,43 @@ def sim_left_velocity_callback(v):
 
 def publish_pid_input(desired_vr, desired_vl):
     '''publishes the desired input to the control loop'''
-    right_pub = rospy.Publisher(right_ns+"/setpoint", Float64, queue_size=queue_size)
-    left_pub = rospy.Publisher(left_ns+"/setpoint", Float64, queue_size=queue_size)
+    global setpoint_pub_right, setpoint_pub_left, feedback_encoder_pub_right, feedback_encoder_pub_left, wheel_vel_pub
     my_msg = Float64()
     my_msg2 = Float64()
     my_msg.data =desired_vr
     my_msg2.data =desired_vl
     if not rospy.is_shutdown():
-        right_pub.publish(my_msg)
-        left_pub.publish(my_msg2)
+        setpoint_pub_right.publish(my_msg)
+        setpoint_pub_left.publish(my_msg2)
     else:
         rospy.logerr("rospy is shutdown, didnt publish")
 
 def publish_feedback_pid(vr,vl):
     '''publishes the feedback to the PID controller node'''
-    # encoder publisers
-    right_enc_pub = rospy.Publisher(right_ns+"/state", Float64, queue_size=queue_size)
-    left_enc_pub = rospy.Publisher(left_ns+"/state", Float64, queue_size=queue_size)
-
+    global setpoint_pub_right, setpoint_pub_left, feedback_encoder_pub_right, feedback_encoder_pub_left, wheel_vel_pub
     my_msg = Float64()
     my_msg2 = Float64()
     my_msg.data =vr
     my_msg2.data =vl
     if not rospy.is_shutdown():
-        right_enc_pub.publish(my_msg)
-        left_enc_pub.publish(my_msg2)
+        feedback_encoder_pub_right.publish(my_msg)
+        feedback_encoder_pub_left.publish(my_msg2)
         # rospy.loginfo("published vr {}, vl {}".format(vr,vl))
     else:
         rospy.logerr("rospy is shutdown, didnt publish")
 
-
 def publish_simulation_command(vr, vl):
     '''publishes right and left wheel velocities to coppeliaSim'''
-    pub = rospy.Publisher("vel_wheels", Float32MultiArray, queue_size=queue_size)
-    rate = rospy.Rate(10) # 10hz 
+    global wheel_vel_pub
+    # rate = rospy.Rate(10) # 10hz 
     my_msg = Float32MultiArray()
     my_msg.data = [vr, vl]
     if not rospy.is_shutdown():
-        pub.publish(my_msg)
+        wheel_vel_pub.publish(my_msg)
         rospy.loginfo("published vr {}, vl {}".format(vr,vl))
-        rate.sleep()
+        # rate.sleep()
     else:
         rospy.logerr("rospy is shutdown, didnt publish")
-
 
 def clamp_velocity_to_limit(v):
     if v > max_limit:
@@ -151,19 +162,23 @@ def calculate_desired_velocities(desired_w):
     print("clamped: vl {}, vr {} ".format(vl, vr))
     # publish_simulation_command(vr, vl)
     return (vr, vl)
-
-def new_sim_command(desired_w):
-    vr, vl = calculate_desired_velocities(desired_w)
-    publish_simulation_command(vr, vl)
+    
 
 if __name__ == '__main__':
     try:
-        print('main')
-        # publish initial command
-        rospy.init_node("diff_drive_pub")
+        node_name = "diff_drive_head"
+        rospy.init_node(node_name)
+        rospy.loginfo("Starting " + node_name)
+
         init_simulation_listeners()
-        new_sim_command(pi/2)
-        
+        init_simulation_publishers()
+        rate= rospy.Rate(10)
+        target_omega = 0
+        while not rospy.is_shutdown():
+            vr, vl = calculate_desired_velocities(target_omega)
+            publish_simulation_command(vr, vl)
+            rate.sleep()
         rospy.spin()
+        
     except rospy.ROSInterruptException:
         pass
