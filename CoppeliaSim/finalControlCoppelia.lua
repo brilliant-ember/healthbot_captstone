@@ -29,8 +29,9 @@ function sysCall_init()
     velocityRight = 0
     velocityLeft = 0
     
-    sim.setJointTargetVelocity(lJoint, rawSpeed)
-    sim.setJointTargetVelocity(rJoint, rawSpeed)
+    -- we only take commands from ROS callback
+    --sim.setJointTargetVelocity(lJoint, rawSpeed)
+    --sim.setJointTargetVelocity(rJoint, rawSpeed)
     
     -- launch the ros client
     if simROS then
@@ -158,7 +159,19 @@ function sysCall_sensing()
         simROS.publish(cameraPub2, d2)
     end
     
-        frontDistance = getSonarDistance(frontSonar)
+        --test_drive_logic()
+
+end
+
+function sysCall_cleanup()
+    -- do some clean-up here
+end
+
+-- See the user manual or the available code snippets for additional callback functions and details
+
+function test_drive_logic()
+
+frontDistance = getSonarDistance(frontSonar)
         rightDistance = getSonarDistance(rightSonar)
         leftDistance = getSonarDistance(leftSonar)
         
@@ -183,13 +196,6 @@ function sysCall_sensing()
         --print(sim.getObjectVelocity(lJoint))
 
 end
-
-function sysCall_cleanup()
-    -- do some clean-up here
-end
-
--- See the user manual or the available code snippets for additional callback functions and details
-
 function turnToFurthestWall(frontDistance, rightDistance, leftDistance)
     -- right distance from wall is largest
     if (rightDistance > leftDistance and rightDistance>frontDistance) then

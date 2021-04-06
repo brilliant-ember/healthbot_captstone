@@ -39,6 +39,7 @@ wheel_vel_pub = None
 ## debug
 print_pub_log = False
 print_debug_log = False
+print_sub_log = False
 
 def init_simulation_publishers():
     global setpoint_pub_right, setpoint_pub_left, feedback_encoder_pub_right, feedback_encoder_pub_left, wheel_vel_pub
@@ -49,24 +50,24 @@ def init_simulation_publishers():
     feedback_encoder_pub_left = rospy.Publisher(left_ns+"/state", Float64, queue_size=queue_size)
     # for coppeliasim
     wheel_vel_pub = rospy.Publisher("vel_wheels", Float32MultiArray, queue_size=queue_size)
-def encoder_callback(data):
-    # gets feedback data from coppeliaSim sensors and publishes drive commands back
-    rospy.loginfo("received data")
-    # this is angular speed from the simulation feedback sensor
-    wR = data.data[0]  # right motor angular speed
-    wL = data.data[1]  # left motor angular speed
-    # closed loop call goes here
-    wd = pi/2
-    # calculate_desired_velocities(wd)
-    publish_feedback_pid(wR, wL) # publish the feedback so the pid controller node can compensate
-    vr, vl = calculate_desired_velocities(wd)
-    publish_pid_input(vr, vl)
 
 def init_simulation_listeners():
     rospy.Subscriber("sim_encoder", Float32MultiArray, encoder_callback)
     # these two below translate control effort to something that coppeliasim understands
     rospy.Subscriber(right_ns+"/control_effort", Float64, sim_right_velocity_callback)
     rospy.Subscriber(left_ns+"/control_effort", Float64, sim_left_velocity_callback)
+
+def encoder_callback(data):
+    ''' gets feedback data from coppeliaSim sensors and publishes drive commands back'''
+    if print_sub_log:
+        ospy.loginfo("received data")
+    # this is angular speed from the simulation feedback sensor
+    wR = data.data[0]  # right motor angular speed
+    wL = data.data[1]  # left motor angular speed
+    wd = pi/2
+    publish_feedback_pid(wR, wL) # publish the feedback so the pid controller node can compensate
+    vr, vl = calculate_desired_velocities(wd)
+    publish_pid_input(vr, vl)
 
 def sim_right_velocity_callback(v):
     ''' publishes pid commands to the coppeliasim simulation'''
