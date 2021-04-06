@@ -36,6 +36,9 @@ feedback_encoder_pub_right = None
 feedback_encoder_pub_left = None
 ## publishers to coppeliasim
 wheel_vel_pub = None
+## debug
+print_pub_log = False
+print_debug_log = False
 
 def init_simulation_publishers():
     global setpoint_pub_right, setpoint_pub_left, feedback_encoder_pub_right, feedback_encoder_pub_left, wheel_vel_pub
@@ -64,10 +67,6 @@ def init_simulation_listeners():
     # these two below translate control effort to something that coppeliasim understands
     rospy.Subscriber(right_ns+"/control_effort", Float64, sim_right_velocity_callback)
     rospy.Subscriber(left_ns+"/control_effort", Float64, sim_left_velocity_callback)
-
-    # rospy.Subscriber("odom", Odometry, encoder_callback)
-    # spin() simply keeps python from exiting until this node is stopped
-    # rospy.spin()
 
 def sim_right_velocity_callback(v):
     ''' publishes pid commands to the coppeliasim simulation'''
@@ -105,7 +104,8 @@ def publish_feedback_pid(vr,vl):
     if not rospy.is_shutdown():
         feedback_encoder_pub_right.publish(my_msg)
         feedback_encoder_pub_left.publish(my_msg2)
-        # rospy.loginfo("published vr {}, vl {}".format(vr,vl))
+        if print_pub_log:
+            rospy.loginfo("published encoder feedback vr {}, vl {}".format(vr,vl))
     else:
         rospy.logerr("rospy is shutdown, didnt publish")
 
@@ -117,8 +117,8 @@ def publish_simulation_command(vr, vl):
     my_msg.data = [vr, vl]
     if not rospy.is_shutdown():
         wheel_vel_pub.publish(my_msg)
-        rospy.loginfo("published vr {}, vl {}".format(vr,vl))
-        # rate.sleep()
+        if print_pub_log:
+            rospy.loginfo("published vr {}, vl {}".format(vr,vl))
     else:
         rospy.logerr("rospy is shutdown, didnt publish")
 
@@ -129,17 +129,14 @@ def clamp_velocity_to_limit(v):
         return min_limit
     return v
 
-
 def get_linear_velocity(vr, vl):
     # uses the unicycle kinmatic model to get linear velocity
     return (wheel_radius/2 * (vr + vl))
-
 
 def get_angular_velocity(vr, vl):
     # uses unicycle kinmatic model
     w = wheel_radius/L * (vr-vl)
     return w
-
 
 def calculate_desired_velocities(desired_w):
     ''' from the kinamatic model we have two equations that solve for linear velocity and angular velocity
@@ -156,11 +153,12 @@ def calculate_desired_velocities(desired_w):
     vl = (2*left_speed - desired_w*L)/(2*wheel_radius)
     rate_limiter = 0.015 # to avoid saturating the vel, reduce it to x%
     vr, vl = vr*rate_limiter, vl*rate_limiter
-    print("vl {}, vr {} ".format(vl, vr))
+    if print_debug_log:
+        print("vl {}, vr {} ".format(vl, vr))
     vr = clamp_velocity_to_limit(vr)
     vl = clamp_velocity_to_limit(vl)
-    print("clamped: vl {}, vr {} ".format(vl, vr))
-    # publish_simulation_command(vr, vl)
+    if print_debug_log:
+        print("clamped: vl {}, vr {} ".format(vl, vr))
     return (vr, vl)
     
 
