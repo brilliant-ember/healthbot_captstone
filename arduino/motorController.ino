@@ -10,7 +10,6 @@
 
 */
 
-
 // constants
 
 // MAXPWM gives us 100% duty cycle on the default setting of the nodeMCU, but I get short circuits when I run the turn_test() function, so I subtract a number
@@ -35,8 +34,8 @@ const int in4 = 4;
 const int rencoder = 0;
 
 //  odometry values
-int lencoder_pos = 0;
-int rencoder_pos = 0;
+long int lencoder_pos = 0;
+long int rencoder_pos = 0;
 
 // these 4 flags help us determing odomotry direction with just one hall sensor instead of two
 // when all of them are false then both motors are stopped.
@@ -55,6 +54,15 @@ const bool enable_debug_odometer_msgs = true;
 bool unknown_right_spin_dir = false;
 bool unknown_left_spin_dir = false;
 
+// controller communication params
+String cmd;
+const long velocity_send_interval = 100; //milisec, send the wheels feedback to the PI every time this elapses
+unsigned long previousMillis_vel = 0;
+
+//flashing led
+int ledState = LOW;
+unsigned long previousMillis = 0;
+const long interval = 1000;
 
 void setup() {
   Serial.begin(115200);
@@ -65,6 +73,7 @@ void setup() {
   pinMode(in4, OUTPUT);
   pinMode(lencoder, INPUT);
   pinMode(rencoder, INPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
 
   // Turn off motors, Initial state
   turn_off_motors_force();
@@ -75,10 +84,30 @@ void setup() {
 }
 
 void loop() {
-  test_motor_drive();
-
+  led_control();
+  //test_motor_drive();
+  String myString = "7300,2250\n";
+  myString.trim();
+int commaIndex = myString.indexOf(',');
+int vr = myString.substring(0, commaIndex).toInt();
+int vl = myString.substring(commaIndex + 1).toInt();
+vr = map(vr, 0, 10000, MINPWM, MAXPWM);
+vl = map(vl, 0, 10000, MINPWM, MAXPWM);
+Serial.println(vr);
+Serial.println(vl);
 }
 
+void receive_velocity_cmd(){
+  if (Serial.available()) {
+    cmd = Serial.readStringUntil('\n');
+    cmd.trim();
+    int commaIndex = cmd.indexOf(',');
+    int vr = cmd.substring(0, commaIndex).toInt();
+int vl = cmd.substring(commaIndex + 1).toInt();
+Serial.println(vr);
+Serial.println(vl);
+    }
+  }
 void reset_encoder(){
   lencoder_pos = 0;
   rencoder_pos = 0;
@@ -87,6 +116,19 @@ void reset_encoder(){
 void send_encoder_ticks(){
    Serial.print(lencoder_pos); Serial.print("\t");
    Serial.print(rencoder_pos); Serial.print("\n");
+  }
+
+void led_control(){
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    if (ledState == LOW) {
+      ledState = HIGH;  // Note that this switches the LED *off*
+    } else {
+      ledState = LOW;  // Note that this switches the LED *on*
+    }
+    digitalWrite(LED_BUILTIN, ledState);
+    }
   }
 
 ICACHE_RAM_ATTR void update_lencoder() {
