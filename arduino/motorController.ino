@@ -79,9 +79,7 @@ void ICACHE_RAM_ATTR send_feedback_to_PID() {
   /* sends encoder feedback to the dragonboard, which sends it to the PID ros node*/
   if (enable_debug_msgs){Serial.println("In the ISR baby");}
   unsigned long current_time = millis();
-  Serial.println(current_time);
   if (current_time - previous_time >= interval) {
-    
     long dt = current_time - previous_time;
     led_control();
     send_feedback(dt);
@@ -177,8 +175,8 @@ void setup() {
 }
 
 void loop() {
-  printf("in the loop \n");
-  Serial.println("HEYYYY ");
+ // printf("in the loop \n");
+ // Serial.println("HEYYYY ");
 //  /set_right_pwm(MAXPWM);
   //led_control();
   test_motor_drive();// enocder feedback interrupt doesnt work when pwm is going cuz they use the same timer
@@ -215,14 +213,28 @@ void send_feedback(long dt) {
   long distance_left_wheel = lencoder_pos * distance_per_pulse;
   long vel_right = distance_right_wheel / dt;
   long vel_left = distance_left_wheel / dt;
+  if (enable_debug_msgs) {
+    Serial.print("wheels covered distance in micrometers, right then left: \t");
+    Serial.print(distance_right_wheel); Serial.print("\t");
+    Serial.print(distance_left_wheel); Serial.print("\n");
+  
+    Serial.print("wheels vel micrometer/mili_sec, right then left: \t");
+    Serial.print(vel_right); Serial.print("\t");
+    Serial.print(vel_left); Serial.print("\n");
+  } else { 
+    // this print below is for talking with dragonboard, not for debugging
+    Serial.print("dx_vel_r_l: ");
+    Serial.print(distance_right_wheel); Serial.print(" ");
+    Serial.print(distance_left_wheel); Serial.print(" ");
+  
+    //Serial.print("vel:");
+    Serial.print(vel_right); Serial.print(" ");
+    Serial.print(vel_left); Serial.print("\n");
+    
+    }
 
-  Serial.print("wheels covered distance in micrometers, right then left: \t");
-  Serial.print(distance_right_wheel); Serial.print("\t");
-  Serial.print(distance_left_wheel); Serial.print("\n");
-
-  Serial.print("wheels vel micrometer/mili_sec, right then left: \t");
-  Serial.print(vel_right); Serial.print("\t");
-  Serial.print(vel_left); Serial.print("\n");
+  
+  
   reset_encoder();
 }
 

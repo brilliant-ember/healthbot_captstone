@@ -16,11 +16,11 @@ BAUD = 115200
 MAXPWM = 1023 - 70
 MINPWM = 350
 distance_right_wheel, distance_left_wheel, vel_right, vel_left = 0,0,0,0
-cm = 0.001
+conv_factor = 0.0001 # convert micrometers to cm
 publish_rate = 60
-wheel_diameter = 6.5 #cm
+wheel_diameter = 6.5# 6.5 cm
 wheel_rad = wheel_diameter/2
-distance_btwn_wheels = 17 #cm
+distance_btwn_wheels = 17 # 17cm
 # assume robot starts at origin and doesnt move initially
 x = 0.0
 y = 0.0
@@ -90,11 +90,11 @@ def read_serial_data(ser):
             val = str(ser.readline().decode().strip('\r\n'))
             val = val.split()
             if (val[0] == "dx_vel" and len(val) == 5):
-                # distance in micrometers, velocity in micrometer/milisec, so convert to cm
-                distance_right_wheel = float(val[1]) * cm
-                distance_left_wheel = float(val[2]) * cm
-                vel_right = float(val[3]) * cm # no this  is cm/milisec
-                vel_left = float(val[4]) * cm
+                # distance in micrometers, velocity in micrometer/milisec, so convert 
+                distance_right_wheel = float(val[1]) * conv_factor
+                distance_left_wheel = float(val[2]) * conv_factor
+                vel_right = float(val[3]) * conv_factor # no this  is conv_factor/milisec
+                vel_left = float(val[4]) * conv_factor
                 # print(val, end="\n")
                 return True
             # print(dx, end="\n")
