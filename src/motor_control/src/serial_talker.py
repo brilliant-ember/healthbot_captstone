@@ -21,12 +21,14 @@ publish_rate = 60
 wheel_diameter = 6.5# 6.5 cm
 wheel_rad = wheel_diameter/2
 distance_btwn_wheels = 17 # 17cm
+
 # assume robot starts at origin and doesnt move initially
 x = 0.0
 y = 0.0
 th = 0.0
 
 def ros_stuff():
+    print("Started odom pub node")
     global x,y,th, distance_right_wheel, distance_left_wheel, vel_right, vel_left
     rospy.init_node('odometry_publisher')
     odom_pub = rospy.Publisher("odom", Odometry, queue_size=50)
@@ -48,9 +50,11 @@ def ros_stuff():
             delta_y = (vx * sin(w) + vy * cos(w)) * dt
             delta_th = w * dt
 
+            experimental_offset = 8 # angular movement was too slow in rviz so I had to amp it up here
+
             x += delta_x
             y += delta_y
-            th += delta_th
+            th += delta_th * experimental_offset
             
             odom_quat = tf.transformations.quaternion_from_euler(0, 0, th)
 

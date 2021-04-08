@@ -177,23 +177,24 @@ void setup() {
 void loop() {
  // printf("in the loop \n");
  // Serial.println("HEYYYY ");
-//  /set_right_pwm(MAXPWM);
+ drive_square();
   //led_control();
-  test_motor_drive();// enocder feedback interrupt doesnt work when pwm is going cuz they use the same timer
-  //send_feedback();
-  /*
-    String myString = "7300,2250\n";
-    myString.trim();
-    int commaIndex = myString.indexOf(',');
-    int vr = myString.substring(0, commaIndex).toInt();
-    int vl = myString.substring(commaIndex + 1).toInt();
-    vr = map(vr, 0, 10000, MINPWM, MAXPWM);
-    vl = map(vl, 0, 10000, MINPWM, MAXPWM);
-    Serial.println(vr);
-    Serial.println(vl);
-  */
+  //test_motor_drive();// enocder feedback interrupt doesnt work when pwm is going cuz they use the same timer
+
 }
 
+void drive_square(){
+  int s = MINPWM + 200;
+  int d1 = 2000;
+  int d2 = 450;
+  move_forward(s);
+  delay(d1);
+  turn_off_motors();
+  delay(d2);
+  move_right(s);
+  delay(d1 * 2);
+
+  }
 void receive_velocity_cmd() {
   // takes velocity command from db and updates pwm for motors
   if (Serial.available()) {
@@ -223,7 +224,7 @@ void send_feedback(long dt) {
     Serial.print(vel_left); Serial.print("\n");
   } else { 
     // this print below is for talking with dragonboard, not for debugging
-    Serial.print("dx_vel_r_l: ");
+    Serial.print("dx_vel ");
     Serial.print(distance_right_wheel); Serial.print(" ");
     Serial.print(distance_left_wheel); Serial.print(" ");
   

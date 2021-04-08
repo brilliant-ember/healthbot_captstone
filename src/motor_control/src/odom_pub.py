@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+######LEGACY LOOK AT serial_talker.py   
 import math
 from math import sin, cos, pi
 
