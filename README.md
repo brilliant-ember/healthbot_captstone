@@ -1,5 +1,9 @@
 # Capstone project healthbot
 
+https://www.youtube.com/playlist?list=PLD1pHgB031ck666_LJpps_zopNTI3XrwL
+
+Deep learning depth point cloud from monocular camera was the best pointcloud produced, but there's no video for it in the playlist above.
+
 ## PID control
 this package is used http://wiki.ros.org/pid
 to start PID control with coppeliasim
