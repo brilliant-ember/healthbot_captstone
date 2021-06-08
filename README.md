@@ -33,7 +33,7 @@ For my motor I have:
 - distnace convered per 1 wheel rev = diameter * pi = 20.4 cm 
 - 231 pulses = 20.4 cm, so 1 pulse = 0.08cm, so to go 1 meter we have 1250 pulses
 - distance between wheels is 17cm
-So we get __distnace traveled per wheel = Diameter*pi*counted ticks/231__ or _deltaX = d*pi*ticks/tickesPerRev_
+So we get __distnace traveled per wheel = Diameter\*pi\*counted ticks/231__ or _deltaX = d\*pi\*ticks/tickesPerRev_
 now we need linear velocity and angular velocity w, go to the blog post I put it has a neat explanation 
 
 ## Battery and Power
