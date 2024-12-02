@@ -2,7 +2,8 @@
 <sdf version="1.4">
 
     <world name="default">
-        <include>
+
+<include>
             <uri>model://ground_plane</uri>
         </include>
 
@@ -10,11 +11,47 @@
             <uri>model://sun</uri>
         </include>
 
-        <gui fullscreen='0'>
-            <camera name='user_camera'>
-                <pose>4.927360 -4.376610 3.740080 0.000000 0.275643 2.356190</pose>
-                <view_controller>orbit</view_controller>
-            </camera>
-        </gui>
+
+<model name='iscas_museum'>
+      <link name='link'>
+        <inertial>
+          <mass>15</mass>
+        </inertial>
+        <collision name='collision'>
+          <pose frame=''>0 0 0 0 0 -1.57</pose>
+          <geometry>
+            <mesh>
+              <uri>model://iscas_museum/meshes/ISCAS_museum.dae</uri>
+            </mesh>
+          </geometry>
+          <max_contacts>10</max_contacts>
+          <surface>
+            <contact>
+              <ode/>
+            </contact>
+            <bounce/>
+            <friction>
+              <torsional>
+                <ode/>
+              </torsional>
+              <ode/>
+            </friction>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <pose frame=''>0 0 0 0 0 -1.57</pose>
+          <geometry>
+            <mesh>
+              <uri>model://iscas_museum/meshes/ISCAS_museum.dae</uri>
+            </mesh>
+          </geometry>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <static>1</static>
+      <pose frame=''>-0.922758 -1.55336 0 0 -0 0</pose>
+    </model>
     </world>
 </sdf>
